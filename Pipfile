@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "5.2"
+pytest = "*"
+django-environ = "*"
+
+[dev-packages]
+flake8 = "*"
+black = "*"
+isort = "*"
+django-extensions = "*"
+ipython = "*"
+django-debug-toolbar = "*"
+
+[requires]
+python_version = "3.12"
