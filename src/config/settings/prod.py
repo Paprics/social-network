@@ -1,8 +1,8 @@
 # prod.py
-from pathlib import Path
 import os
 
-from config.settings.base import *  # noqa: F403
+from config.settings.base import *  # noqa: F403 F401
+from src.config.settings.base import BASE_DIR
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 

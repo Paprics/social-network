@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "937a11cd96681193d7abc64e72cddf1e3cb2986fc364f7b389fe6cebd8dcbdab"
+            "sha256": "f174956f50baa8c77accb5edbbe2e7bf8def192b6dd44558b2023666f0223cce"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -26,12 +26,12 @@
         },
         "django": {
             "hashes": [
-                "sha256:60c35bd96201b10c6e7a78121bd0da51084733efa303cc19ead021ab179cef5e",
-                "sha256:a1228c384f8fa13eebc015196db7b3e08722c5058d4758d20cb287503a540d8f"
+                "sha256:1a47f7a7a3d43ce64570d350e008d2949abe8c7e21737b351b6a1611277c6d89",
+                "sha256:91ceed4e3a6db5aedced65e3c8f963118ea9ba753fc620831c77074e620e7d83"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==5.2.4"
+            "version": "==5.2"
         },
         "django-environ": {
             "hashes": [
@@ -41,6 +41,17 @@
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_version < '4'",
             "version": "==0.12.0"
+        },
+        "django-phonenumber-field": {
+            "extras": [
+                "phonenumbers"
+            ],
+            "hashes": [
+                "sha256:9ba66873bf47401b13fc57797fbf85e785864a6bfdc8b9daa3a9012886567045",
+                "sha256:f19450625574ad3a2de047c409527d0e57699496849e71e53b53e8679ff67b27"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==8.1.0"
         },
         "iniconfig": {
             "hashes": [
@@ -57,6 +68,13 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==25.0"
+        },
+        "phonenumbers": {
+            "hashes": [
+                "sha256:13b91aa153f87675902829b38a556bad54824f9c121b89588bbb5fa8550d97ef",
+                "sha256:c640545019a07e68b0bea57a5fede6eef45c7391165d28935f45615f9a567a5b"
+            ],
+            "version": "==9.0.9"
         },
         "pluggy": {
             "hashes": [
