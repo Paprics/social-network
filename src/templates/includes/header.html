@@ -1,9 +1,68 @@
 <header class="d-flex justify-content-center py-3 bg-dark">
-  <ul class="nav nav-pills">
-    <li class="nav-item"><a href="#" class="nav-link active text-white" aria-current="page">Home</a></li>
-    <li class="nav-item"><a href="#" class="nav-link text-white">Features</a></li>
-    <li class="nav-item"><a href="#" class="nav-link text-white">Pricing</a></li>
-    <li class="nav-item"><a href="#" class="nav-link text-white">FAQs</a></li>
-    <li class="nav-item"><a href="#" class="nav-link text-white">About</a></li>
-  </ul>
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
+        </li>
+        <li class="nav-item"><a href="#" class="nav-link text-white">Search</a></li>
+        <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link text-white">Admin</a></li>
+
+
+        <!-- Кнопка открытия модального окна Singup-->
+        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#signupModal">SignUp</a>
+        <!-- Модальное окно -->
+        {% include 'includes/signup_modal.html' %}
+
+        <!-- Кнопка открытия модального окна Login-->
+        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+        <!-- Модальное окно -->
+        {% include 'includes/login_modal.html' %}
+
+        <!-- AUTH -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownMenuLink" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                Auth
+            </a>
+            <!-- ITEMS MENU -->
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuLink">
+
+                <!-- SinUp -->
+                <li>
+                    <a class="dropdown-item" href="#">SigUp</a>
+                </li>
+
+                <!-- Login -->
+                <li>
+                    <a href="{% url 'accounts:login' %}" class="dropdown-item">LogIn</a>
+                </li>
+
+                <!-- Reset Password -->
+                <li>
+                    <a class="dropdown-item" href="#">Reset Password</a>
+                </li>
+
+                <!-- Change Password -->
+                <li>
+                    <a class="dropdown-item" href="#">Change Password</a>
+                </li>
+
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+
+                <!-- Logout -->
+                <li>
+                    <form method="post" action="{% url 'accounts:logout' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item"
+                                style="border: none; background: none; padding: .25rem 1rem; width: 100%; text-align: left;">
+                            Logout
+                        </button>
+                    </form>
+                </li>
+
+            </ul>
+        </li>
+
+
+    </ul>
 </header>
