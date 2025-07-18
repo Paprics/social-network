@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -34,9 +35,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
             "unique": _("A user with that username already exists."),
         },
     )
-    first_name = models.CharField(_("first name"), max_length=150, blank=True)
-    last_name = models.CharField(_("last name"), max_length=150, blank=True)
-    email = models.EmailField(_("email address"), blank=True)
+    email = models.EmailField(_("email address"), blank=False, unique=True)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -53,9 +52,9 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
-    EMAIL_FIELD = "email"
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email", "phone_number"]
+    EMAIL_FIELD = "email"  # Field for send mail
+    USERNAME_FIELD = "phone_number"  # Fields for auth
+    REQUIRED_FIELDS = ["email", "username"]
 
     class Meta:
         verbose_name = _("user")
@@ -66,16 +65,37 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
         self.email = self.__class__.objects.normalize_email(self.email)
 
     def get_full_name(self):
-        """
-        Return the first_name plus the last_name, with a space in between.
-        """
-        full_name = "%s %s" % (self.first_name, self.last_name)
+
+        full_name = f"{self.username} {self.phone_number}"
         return full_name.strip()
 
-    def get_short_name(self):
-        """Return the short name for the user."""
-        return self.first_name
-
     def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+    def __str__(self):
+        return f"{self.username} ({self.phone_number})"
+
+
+class UserProfileModel(models.Model):
+    class Gender(models.TextChoices):
+        MALE = "M", _("Male")
+        FEMALE = "F", _("Female")
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    first_name = models.CharField(_("first name"), max_length=150, blank=True)
+    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+    gender = models.CharField(
+        max_length=1,
+        choices=Gender.choices,
+        blank=True,
+        verbose_name=_("gender"),
+    )
+    city = models.CharField(_("city"), max_length=150, blank=True)
+    date_of_birth = models.DateField(_("date of birth"), blank=True, null=True)
+
+    def __str__(self):
+        return f"Profile of {self.user}"
+
+    class Meta:
+        verbose_name = _("user profile")
+        verbose_name_plural = _("user profiles")

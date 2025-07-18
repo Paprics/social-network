@@ -136,3 +136,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 AUTH_USER_MODEL = "accounts.CustomUserModel"
 
 LOGOUT_REDIRECT_URL = "/"
+
+AUTHENTICATION_BACKENDS = [
+    "accounts.authentication.PhoneNumberBackend",  # Custom auth for custom UserModel
+    "django.contrib.auth.backends.ModelBackend",
+]
