@@ -16,6 +16,7 @@ isort = "*"
 django-extensions = "*"
 ipython = "*"
 django-debug-toolbar = "*"
+pytest-django = "*"
 
 [requires]
 python_version = "3.12"

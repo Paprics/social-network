@@ -10,21 +10,23 @@ class CustomUserManager(BaseUserManager):
 
     def _create_user(self, phone_number, password, **extra_fields):
         if not phone_number:
-            raise ValueError(_("The phone number must be set"))
+            raise ValueError('Phone number must be set')
+        if not extra_fields.get('email'):
+            raise ValueError('Email must be set')
+        if not extra_fields.get('username'):
+            raise ValueError('Username must be set')
 
-        email = self.normalize_email(extra_fields.get("email"))
-        extra_fields["email"] = email
+        email = self.normalize_email(extra_fields.pop('email'))
+        username = extra_fields.pop('username')
 
-        GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
-
-        user = GlobalUserModel(phone_number=phone_number, **extra_fields)
-        user.password = make_password(password)
+        user = self.model(phone_number=phone_number, email=email, username=username, **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_user(self, phone_number, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
         return self._create_user(phone_number, password, **extra_fields)
 
     def create_superuser(self, phone_number, password=None, **extra_fields):
