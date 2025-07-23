@@ -1,12 +1,9 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 
 from accounts.models import UserProfileModel
 
-import pytest
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError
 
 @pytest.mark.django_db
 class TestCustomUserModel:
@@ -21,10 +18,7 @@ class TestCustomUserModel:
     def test_create_user_and_profile(self):
         User = get_user_model()
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            phone_number="+380931234567",
-            password="password123"
+            username="testuser", email="test@example.com", phone_number="+380931234567", password="password123"
         )
         assert user.pk is not None
         profile = UserProfileModel.objects.get(user=user)
@@ -32,30 +26,39 @@ class TestCustomUserModel:
 
     def test_unique_username(self):
         User = get_user_model()
-        User.objects.create_user(username="uniqueuser", email="a@example.com", phone_number="+380931234568", password="pass123")
+        User.objects.create_user(
+            username="uniqueuser", email="a@example.com", phone_number="+380931234568", password="pass123"
+        )
         with pytest.raises(IntegrityError):
-            User.objects.create_user(username="uniqueuser", email="b@example.com", phone_number="+380931234569", password="pass123")
+            User.objects.create_user(
+                username="uniqueuser", email="b@example.com", phone_number="+380931234569", password="pass123"
+            )
 
     def test_unique_email(self):
         User = get_user_model()
-        User.objects.create_user(username="user1", email="unique@example.com", phone_number="+380931234570", password="pass123")
+        User.objects.create_user(
+            username="user1", email="unique@example.com", phone_number="+380931234570", password="pass123"
+        )
         with pytest.raises(IntegrityError):
-            User.objects.create_user(username="user2", email="unique@example.com", phone_number="+380931234571", password="pass123")
+            User.objects.create_user(
+                username="user2", email="unique@example.com", phone_number="+380931234571", password="pass123"
+            )
 
     def test_unique_phone_number(self):
         User = get_user_model()
-        User.objects.create_user(username="user3", email="c@example.com", phone_number="+380931234572", password="pass123")
+        User.objects.create_user(
+            username="user3", email="c@example.com", phone_number="+380931234572", password="pass123"
+        )
         with pytest.raises(IntegrityError):
-            User.objects.create_user(username="user4", email="d@example.com", phone_number="+380931234572", password="pass123")
+            User.objects.create_user(
+                username="user4", email="d@example.com", phone_number="+380931234572", password="pass123"
+            )
 
     def test_create_user_without_username(self):
         User = get_user_model()
         with pytest.raises(ValueError):
             User.objects.create_user(
-                username=None,
-                email="test@example.com",
-                phone_number="+380931234567",
-                password="password123"
+                username=None, email="test@example.com", phone_number="+380931234567", password="password123"
             )
 
     def test_create_user_without_email(self):
@@ -63,28 +66,15 @@ class TestCustomUserModel:
         # если email обязателен в модели и менеджере
         with pytest.raises(ValueError):
             User.objects.create_user(
-                username="testuser",
-                email=None,
-                phone_number="+380931234567",
-                password="password123"
+                username="testuser", email=None, phone_number="+380931234567", password="password123"
             )
 
     def test_create_user_without_phone_number(self):
         User = get_user_model()
         with pytest.raises(ValueError):
             User.objects.create_user(
-                username="testuser",
-                email="test@example.com",
-                phone_number=None,
-                password="password123"
+                username="testuser", email="test@example.com", phone_number=None, password="password123"
             )
-
-
-
-
-
-
-
 
     # def test_successful_registration(self, client):
     #     url = reverse('register')  # или твой урл регистрации
@@ -107,6 +97,7 @@ class TestCustomUserModel:
 
     def test_registration_with_invalid_phone(self):
         pass
+
 
 class TestLogin:
     def test_login_successful(self):

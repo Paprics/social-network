@@ -1,4 +1,4 @@
-{% if user.is_authenticated %}
+{% if user.is_authenticated and not user.is_email_verified %}
     <div id="verify-message"
          style="display: none; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;
                 padding: 12px; border-radius: 6px; margin: 10px 0; text-align: center;">
@@ -7,18 +7,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const isEmailVerified = {{ is_email_verified|yesno:"true,false" }};
+            const isEmailVerified = false;  // Можно и не проверять, т.к. блок отрисовывается только если не верифицирован
+            const message = document.getElementById("verify-message");
+            message.style.display = "block";
 
-            if (!isEmailVerified) {
-                const message = document.getElementById("verify-message");
-                message.style.display = "block";
-
-                setTimeout(() => {
-                    message.style.transition = "opacity 0.5s ease-out";
-                    message.style.opacity = "0";
-                    setTimeout(() => message.style.display = "none", 500);
-                }, 5000);
-            }
+            setTimeout(() => {
+                message.style.transition = "opacity 0.5s ease-out";
+                message.style.opacity = "0";
+                setTimeout(() => message.style.display = "none", 500);
+            }, 5000);
         });
     </script>
 {% endif %}

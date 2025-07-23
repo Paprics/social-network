@@ -52,9 +52,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(
         _("email verified"),
         default=False,
-        help_text=_(
-            "Indicates whether the user's email address has been verified."
-        ),
+        help_text=_("Indicates whether the user's email address has been verified."),
     )
 
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
