@@ -48,12 +48,21 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
             "Designates whether this user should be treated as active. " "Unselect this instead of deleting accounts."
         ),
     )
+
+    is_email_verified = models.BooleanField(
+        _("email verified"),
+        default=False,
+        help_text=_(
+            "Indicates whether the user's email address has been verified."
+        ),
+    )
+
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
     objects = CustomUserManager()
 
     EMAIL_FIELD = "email"  # Field for send mail
-    USERNAME_FIELD = "phone_number"  # Fields for auth
+    USERNAME_FIELD = "phone_number"  # Fields for auth (auth form)
     REQUIRED_FIELDS = ["email", "username"]
 
     class Meta:

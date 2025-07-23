@@ -139,5 +139,5 @@ LOGOUT_REDIRECT_URL = "/"
 
 AUTHENTICATION_BACKENDS = [
     "accounts.authentication.PhoneNumberBackend",  # Custom auth for custom UserModel
-    "django.contrib.auth.backends.ModelBackend",
+    # "django.contrib.auth.backends.ModelBackend",
 ]

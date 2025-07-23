@@ -1,5 +1,14 @@
 <header class="d-flex justify-content-center py-3 bg-dark">
     <ul class="nav nav-pills">
+
+        <!-- Hello -->
+        {% if user.is_authenticated %}
+            <li class="nav-item nav-link text-white">Hello, {{ user.get_full_name }}!</li>
+            <li class="nav-item nav-link text-white">Hello, {{ user.profile.first_name }}!</li>
+        {% else %}
+            <li class="nav-item nav-link text-white">Hello, Guest!</li>
+        {% endif %}
+
         <li class="nav-item"><a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
         </li>
         <li class="nav-item"><a href="#" class="nav-link text-white">Search</a></li>
