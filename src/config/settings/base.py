@@ -141,3 +141,13 @@ AUTHENTICATION_BACKENDS = [
     "accounts.authentication.PhoneNumberBackend",  # Custom auth for custom UserModel
     # "django.contrib.auth.backends.ModelBackend",
 ]
+
+# SEND EMAIL
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.ukr.net"
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = "privet.poka@ukr.net"

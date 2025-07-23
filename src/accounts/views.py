@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
 from django.http.response import HttpResponseRedirect
 from django.urls.base import reverse_lazy
 from django.views.generic.edit import CreateView, DeleteView
-from utils.utils import send_registration_mail
+from accounts.utils.utils import send_registration_email
 
 from . import forms
 from .forms import LoginForm, UserRegistrationForm
@@ -16,16 +16,17 @@ class SignUpView(CreateView):
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('main:index')
 
-    def post(self, request, *args, **kwargs):
-        print(request.POST)
-        return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     print(request.POST)
+    #     return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.is_email_verified = False
         self.object.save()
 
-        # send_registration_emeil()
+        send_registration_email(self.object, self.request)
+
 
         login(self.request, self.object)
 

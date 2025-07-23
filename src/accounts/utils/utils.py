@@ -9,20 +9,20 @@ from django.utils.http import urlsafe_base64_encode
 
 class TokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
-        return f"{user.pk}{timestamp}{user.is_active}"
+        return f"{user.pk}{timestamp}{user.is_email_verified}"
 
 
-def send_registration_mail(customer, request) -> None:
+def send_registration_email(user, request) -> None:
 
-    uidb64 = urlsafe_base64_encode(force_bytes(customer.id))
-    token = TokenGenerator().make_token(customer)
+    uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+    token = TokenGenerator().make_token(user)
     domain = get_current_site(request).domain
     activation_link = f"http://{domain}/activate/{uidb64}/{token}/"
 
     message = render_to_string(
         "activation_email.html",
         {
-            "customer": customer,
+            "user": user,
             "activation_link": activation_link,
         },
     )
@@ -30,7 +30,7 @@ def send_registration_mail(customer, request) -> None:
     email = EmailMessage(
         subject="Активація облікового запису",
         body=message,
-        to=[customer.email],
+        to=[user.email],
     )
 
     email.content_subtype = "html"
