@@ -1,14 +1,35 @@
 from django.contrib.auth import get_user_model, login
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
+from django.contrib.auth.views import (LoginView, LogoutView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetView, PasswordResetCompleteView)
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import render, redirect
-from django.urls.base import reverse_lazy, reverse
+from django.urls.base import reverse, reverse_lazy
+from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import CreateView, DeleteView
-from django.utils.http import urlsafe_base64_decode
-from accounts.utils.utils import send_registration_email, TokenGenerator
+
+from accounts.utils.utils import TokenGenerator, send_registration_email
 
 from .forms import LoginForm, UserRegistrationForm
+
+
+# RESET PASSWORD
+class ResetPasswordView(PasswordResetView):
+    template_name = "registration/reset_password.html"
+    email_template_name = "reset_password_email.html"
+    success_url = reverse_lazy("accounts:password_reset_done")
+
+    # def get_success_url(self):
+    #     return reverse_lazy('accounts:password_reset_done')
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = "registration/reset_password_confirm.html"
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'registration/reset_password_complete.html'
 
 
 # REGISTRATION

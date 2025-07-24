@@ -154,4 +154,4 @@ DEFAULT_FROM_EMAIL = "privet.poka@ukr.net"
 
 
 # DEBUG SEND MAIL INTO CONSOLE
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
