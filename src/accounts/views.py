@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
                                        PasswordResetView, PasswordResetCompleteView)
 from django.http.response import HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, View
 from django.views.generic.edit import CreateView, DeleteView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
@@ -26,6 +29,7 @@ class ResetPasswordView(PasswordResetView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name = "registration/reset_password_confirm.html"
     success_url = reverse_lazy("accounts:password_reset_complete")
+    # TODO: Prevent password reset token reuse after user login (invalidate old tokens)
 
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
@@ -80,30 +84,23 @@ class EmailVerificationView(RedirectView):
         return reverse("accounts:activation-failed")
 
 
-class LoginView(LoginView):
-    template_name = "registration/login.html"
-    form_class = LoginForm
-    success_url = reverse_lazy("main:index")
+class CustomLoginView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
+            return redirect("main:index")
+        form = AuthenticationForm()
+        return render(request, "registration/login.html", {"form": form})
 
-    # def form_valid(self, form):
-    #     # 💥 Вот тут ставишь точку останова (например, PyCharm: клик слева от строки)
-    #     print("CLEANED DATA:", form.cleaned_data)  # или смотри в отладчике
-    #     return super().form_valid(form)
-
-
-# class LoginView(LoginView):
-#     template_name = "registration/login.html"
-#     authentication_form = AuthenticationForm
-#     redirect_authenticated_user = True
-#
-#     def get_success_url(self):
-#         return reverse_lazy("common:index")
+    def post(self, request):
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            # Тут логиним пользователя
+            login(request, form.get_user())
+            return redirect("main:index")
+        return render(request, "registration/login.html", {"form": form})
 
 
 class Logout(LogoutView): ...
-
-
-class PasswordReset(PasswordResetView): ...
 
 
 class DeleteView(DeleteView): ...

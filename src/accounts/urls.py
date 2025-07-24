@@ -8,7 +8,7 @@ app_name = "accounts"
 
 urlpatterns = [
     #
-    path("login/", views.LoginView.as_view(), name="login"),
+    path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     # REGISTRATION
     path("signup/", views.SignUpView.as_view(), name="signup"),
@@ -34,6 +34,7 @@ urlpatterns = [
     # STEP 2
     path("reset/<uidb64>/<token>/", views.CustomPasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("reset-complete/done/", views.CustomPasswordResetCompleteView.as_view(), name="password_reset_complete"),
+path('reset/invalid/', TemplateView.as_view(template_name='registration/password_reset_invalid.html'), name='password_reset_invalid'),
 
     # OTHER
     path("delete/", views.DeleteView.as_view(), name="delete"),
