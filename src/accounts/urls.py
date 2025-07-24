@@ -45,4 +45,10 @@ urlpatterns = [
         TemplateView.as_view(template_name="delete_account_success.html"),
         name="delete_account_success",
     ),
+    path("chenge-password/", views.ChangePasswordView.as_view(), name="chenge_password"),
+    path(
+        "change-password/success/",
+        TemplateView.as_view(template_name="change_password_complete.html"),
+        name="change_password_success",
+    ),
 ]

@@ -1,5 +1,5 @@
-from django.contrib.auth import get_user_model, login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model, login, update_session_auth_hash
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView, View
-from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.edit import CreateView, DeleteView, FormView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
 
@@ -111,3 +111,17 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, queryset=None):
         return self.request.user
+
+
+class ChangePasswordView(LoginRequiredMixin, FormView):
+    template_name = "change_password.html"
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy("accounts:change_password_success")
+
+    def get_form(self, form_class=None):
+        return self.form_class(user=self.request.user, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        user = form.save()
+        update_session_auth_hash(self.request, user)  # Чтобы сессия не слетела после смены пароля
+        return super().form_valid(form)
