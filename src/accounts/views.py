@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.views import (LoginView, LogoutView,
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
-                                       PasswordResetView, PasswordResetCompleteView)
+                                       PasswordResetView)
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView, View
@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView, DeleteView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
 
-from .forms import LoginForm, UserRegistrationForm
+from .forms import UserRegistrationForm
 
 
 # RESET PASSWORD
@@ -33,7 +33,7 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
-    template_name = 'registration/reset_password_complete.html'
+    template_name = "registration/reset_password_complete.html"
 
 
 # REGISTRATION
@@ -100,7 +100,14 @@ class CustomLoginView(View):
         return render(request, "registration/login.html", {"form": form})
 
 
-class Logout(LogoutView): ...
+class Logout(LogoutView):
+    next_page = reverse_lazy("main:index")
 
 
-class DeleteView(DeleteView): ...
+class DeleteAccountView(LoginRequiredMixin, DeleteView):
+    model = get_user_model()
+    success_url = reverse_lazy("accounts:delete_account_success")  # ссылка на success страницу
+    template_name = "delete_account.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user

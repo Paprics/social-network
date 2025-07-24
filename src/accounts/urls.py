@@ -1,4 +1,3 @@
-from django.contrib.auth.views import PasswordResetCompleteView
 from django.urls.conf import path
 from django.views.generic.base import TemplateView
 
@@ -34,8 +33,16 @@ urlpatterns = [
     # STEP 2
     path("reset/<uidb64>/<token>/", views.CustomPasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("reset-complete/done/", views.CustomPasswordResetCompleteView.as_view(), name="password_reset_complete"),
-path('reset/invalid/', TemplateView.as_view(template_name='registration/password_reset_invalid.html'), name='password_reset_invalid'),
-
+    path(
+        "reset/invalid/",
+        TemplateView.as_view(template_name="registration/password_reset_invalid.html"),
+        name="password_reset_invalid",
+    ),
     # OTHER
-    path("delete/", views.DeleteView.as_view(), name="delete"),
+    path("delete-account/", views.DeleteAccountView.as_view(), name="delete"),
+    path(
+        "delete-account/success/",
+        TemplateView.as_view(template_name="delete_account_success.html"),
+        name="delete_account_success",
+    ),
 ]
