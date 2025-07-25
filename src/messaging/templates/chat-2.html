@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <div class="container my-5">
+        <div class="card shadow-sm" style="max-width: 600px; margin: auto; height: 80vh;">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span><strong>Chat</strong></span>
+                <span class="badge bg-success">3 online</span>
+            </div>
+
+            <div id="chat_container" class="card-body overflow-auto" style="height: 100%; padding-bottom: 0;">
+                <ul id="chat_messages" class="list-unstyled d-flex flex-column gap-3">
+
+                    {% for message in chat_messages %}
+                        {% if message.author == request.user %}
+                            <li class="d-flex justify-content-end">
+                                <div class="bg-success text-white p-3 rounded-start rounded-top">
+                                    {{ message.body }}
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="d-flex">
+                                <!-- Если есть аватар, можно вставить здесь -->
+                                <div>
+                                    <div class="bg-light p-3 rounded-end rounded-top">
+                                        {{ message.body }}
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ message.author.get_full_name|default:message.author.username }}
+                                    </small>
+                                </div>
+                            </li>
+                        {% endif %}
+                        {% empty %}
+                        <li class="text-center text-muted">No messages yet.</li>
+                    {% endfor %}
+
+                </ul>
+            </div>
+
+            <div class="card-footer bg-white border-top">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="body" placeholder="Type your message..." maxlength="150" class="form-control">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
