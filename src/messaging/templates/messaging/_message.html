@@ -1,0 +1,17 @@
+{% comment %} Рендер одного сообщения {% endcomment %}
+{% if message.author == request.user %}
+    <li class="d-flex justify-content-end">
+        <div class="bg-success text-white p-3 rounded-start rounded-top">
+            {{ message.body }}
+        </div>
+    </li>
+{% else %}
+    <li class="d-flex">
+        <div>
+            <div class="bg-light p-3 rounded-end rounded-top">
+                {{ message.body }}
+            </div>
+            <small class="text-muted">{{ message.author.get_full_name|default:message.author.username }}</small>
+        </div>
+    </li>
+{% endif %}

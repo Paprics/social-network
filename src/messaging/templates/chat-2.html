@@ -38,13 +38,38 @@
                 </ul>
             </div>
 
+            <!-- FORM -->
             <div class="card-footer bg-white border-top">
-                <form method="POST">
+                <form hx-post="{% url 'messaging:chat' %}" hx-target="#chat_messages" hx-swap="beforeend"
+                      hx-on="htmx:afterRequest: this.reset()">
                     {% csrf_token %}
-                    <input type="text" name="body" placeholder="Type your message..." maxlength="150" class="form-control">
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <div class="d-flex">
+                        <input type="text" name="body" placeholder="Type your message..." maxlength="150"
+                               class="form-control">
+                        <button type="submit" class="btn btn-primary ms-2">Send</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
+
+
+
+    <script>
+        function scrollChatToBottom() {
+            const chatContainer = document.getElementById('chat_container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // При загрузке страницы
+        window.addEventListener('load', scrollChatToBottom);
+
+        // Если у тебя htmx — можно слушать событие вставки контента и тоже скроллить
+        document.body.addEventListener('htmx:afterSwap', (event) => {
+            if (event.detail.target.id === 'chat_messages') {
+                scrollChatToBottom();
+            }
+        });
+    </script>
+
 {% endblock %}
