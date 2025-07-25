@@ -1,0 +1,59 @@
+<!-- Модальное окно -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:login' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Registrate</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="id_lastname" class="form-label">Прізвище</label>
+                        <input type="text" name="lastname" id="id_lastname" class="form-control" required autofocus
+                               oninvalid="this.setCustomValidity('Будь ласка, заповніть це поле')"
+                               oninput="this.setCustomValidity('')">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="#" class="form-label">Імʼя</label>
+                        <input type="text" name="" id="" class="form-control" required
+                               autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" name="username" id="id_username" class="form-control" required
+                               autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="#" class="form-label">Номер мобільного</label>
+                        <input type="tel" name="" id="" class="form-control" required
+                               autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password1" class="form-label">Пароль</label>
+                        <input type="password" name="password1" id="id_password1" class="form-control" required
+                               autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password2" class="form-label">Підтвердіть пароль</label>
+                        <input type="password" name="password2" id="id_password2" class="form-control" required>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Зарееструватися</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

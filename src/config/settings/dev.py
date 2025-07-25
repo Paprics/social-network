@@ -1,5 +1,4 @@
 # dev.py
-from pathlib import Path
 import os
 
 from config.settings.base import *  # noqa: F403
@@ -19,11 +18,9 @@ MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa: F405
 
 # STATIC SETTINGS
 STATIC_URL = "/static/"
-STATICFILES_DIRS = (
-    [  # Include custom static directory (e.g. Source/static) for development
-        BASE_DIR / "static"  # noqa: F405
-    ]
-)
+STATICFILES_DIRS = [  # Include custom static directory (e.g. Source/static) for development
+    BASE_DIR / "static"  # noqa: F405
+]
 
 # Debug Toolbar
 INTERNAL_IPS = [
