@@ -11,7 +11,7 @@
 
         <li class="nav-item"><a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
         </li>
-        <li class="nav-item"><a href="{% url 'messaging:chat' %}" class="nav-link text-white">Chat</a></li>
+        <li class="nav-item"><a href="{% url 'messaging:chat' 'public' %}" class="nav-link text-white">Chat</a></li>
         <li class="nav-item"><a href="#" class="nav-link text-white">Search</a></li>
         <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link text-white">Admin</a></li>
 
@@ -21,12 +21,10 @@
         <!-- Кнопка открытия модального окна Singup-->
         <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#signupModal">SignUp</a>
         <!-- Модальное окно -->
-        {% include 'includes/signup_modal.html' %}
 
         <!-- Кнопка открытия модального окна Login-->
         <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
         <!-- Модальное окно -->
-        {% include 'includes/login_modal.html' %}
 
         <!-- AUTH -->
         <li class="nav-item dropdown">

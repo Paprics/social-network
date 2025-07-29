@@ -8,6 +8,8 @@ django = "5.2"
 pytest = "*"
 django-environ = "*"
 django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
+channels = "*"
+daphne = "*"
 
 [dev-packages]
 flake8 = "*"

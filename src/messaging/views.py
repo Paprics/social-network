@@ -1,52 +1,51 @@
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views import View
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 
-from messaging.forms import ChatMessageCreateForm
-from messaging.models import ChatGroup
+from messaging.models import ChatGroup, GroupMessage
 
 
-class ChatView(View):
-    form_class = ChatMessageCreateForm
-    template_name = "chat-2.html"
+class ChatView(TemplateView):
+    template_name = "chat.html"
 
-    def get(self, request):
-        group = get_object_or_404(ChatGroup, group_name="public")
-        messages = group.messages.order_by("created_at")[:30]
-        form = self.form_class()
-        return render(
-            request,
-            self.template_name,
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Берём room_name из URL (chat/<room_name>/)
+        room_name = self.kwargs.get("room_name")
+
+        # Ищем чат по этому имени или 404 если его нет
+        chatroom = get_object_or_404(ChatGroup, group_name=room_name)
+
+        # Берём сообщения (самые свежие последние)
+        messages = GroupMessage.objects.filter(group=chatroom).order_by("-created_at")
+
+        # Добавляем всё в контекст
+        context.update(
             {
-                "chat_messages": messages,
-                "form": form,
-                "group": group,
-            },
+                "room_name": room_name,  # чтобы можно было вставлять {{ room_name }}
+                "chatroom": chatroom,  # для твоего кода
+                "chat_group": chatroom,  # алиас, чтобы шаблон видел chat_group.*
+                "chat_messages": messages,  # сами сообщения
+                "other_user": None,  # заглушка для приватных чатов (пока нет логики)
+            }
         )
 
-    def post(self, request):
-        form = self.form_class(request.POST)
-        group = get_object_or_404(ChatGroup, group_name="public")
+        return context
 
 
+def edit_chatroom(request, group_name):
+    return HttpResponse(f"Редактирование комнаты {group_name} (заглушка)")
 
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.author = request.user
-            message.group = group
-            message.save()
 
-            # htmx-запрос — возвращаем только фрагмент
-            if request.headers.get("HX-Request") == "true":
-                return render(request, "messaging/_message.html", {"message": message})
-            else:
-                # обычный POST — редирект
-                return redirect('messaging:chat')
+def chat_file_upload(request, group_name):
+    return HttpResponse(f"Файл загружен в {group_name} (заглушка)")
 
-        # форма невалидна — отобразим со старыми сообщениями и ошибками
-        messages = group.messages.order_by("created_at")[:30]
-        context = {
-            "chat_messages": messages,
-            "form": form,
-            "group": group,
-        }
-        return render(request, self.template_name, context)
+
+def chatroom_leave(request, group_name):
+    return HttpResponse(f"Вышли из комнаты {group_name} (заглушка)")
+
+
+# def chat_file_upload(request, group_name):
+#     # Пока заглушка — позже можно будет сделать загрузку файлов
+#     return JsonResponse({"status": "ok"})

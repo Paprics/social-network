@@ -46,3 +46,10 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",  # noqa: F405
         },
     }
+
+# message broker для Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
