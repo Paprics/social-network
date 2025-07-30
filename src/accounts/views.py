@@ -9,11 +9,20 @@ from django.shortcuts import redirect, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView, View
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
 
 from .forms import UserRegistrationForm
+
+User = get_user_model()
+
+class UserProfileView(DetailView):
+    model = User
+    slug_field = "username"          # говорим Django, что slug = username
+    slug_url_kwarg = "username"      # это имя из URLconf
+    template_name = 'user_profile_detail.html'
 
 
 # RESET PASSWORD

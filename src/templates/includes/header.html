@@ -1,70 +1,57 @@
 <header class="d-flex justify-content-center py-3 bg-dark">
     <ul class="nav nav-pills">
 
-        <!-- Hello -->
-        {% if user.is_authenticated %}
-            <li class="nav-item nav-link text-white">Hello, {{ user.get_full_name }}!</li>
-            <li class="nav-item nav-link text-white">Hello, {{ user.profile.first_name }}!</li>
-        {% else %}
-            <li class="nav-item nav-link text-white">Hello, Guest!</li>
-        {% endif %}
-
-        <li class="nav-item"><a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
+        <li class="nav-item">
+            <a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
         </li>
-        <li class="nav-item"><a href="{% url 'messaging:chat' 'public' %}" class="nav-link text-white">Chat</a></li>
-        <li class="nav-item"><a href="#" class="nav-link text-white">Search</a></li>
-        <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link text-white">Admin</a></li>
+        <li class="nav-item">
+            <a href="{% url 'messaging:chat' 'public' %}" class="nav-link text-white">Chat</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link text-white">Search</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'admin:index' %}" class="nav-link text-white">Admin</a>
+        </li>
 
-        <li class="nav-item"><a href="#" class="nav-link text-white">Account</a></li>
+        <!-- 🔽 Account dropdown -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                Account
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="accountDropdown">
 
+                <li>
+                    {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'accounts:user-profile' user.username %}">My profile</a>
+                    {% else %}
+                        <a class="dropdown-item disabled" href="#">My profile</a>
+                    {% endif %}
+                </li>
 
-        <!-- Кнопка открытия модального окна Singup-->
-        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#signupModal">SignUp</a>
-        <!-- Модальное окно -->
+            </ul>
+        </li>
 
-        <!-- Кнопка открытия модального окна Login-->
-        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
-        <!-- Модальное окно -->
-
-        <!-- AUTH -->
+        <!-- 🔽 Auth dropdown -->
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownMenuLink" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
-                Auth
+                {% if user.is_authenticated %}
+                    {{ user.username }}
+                {% else %}
+                    Auth
+                {% endif %}
             </a>
-            <!-- ITEMS MENU -->
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuLink">
-
-                <!-- SinUp -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:signup' %}">SigUp</a>
-                </li>
-
-                <!-- Login -->
-                <li>
-                    <a href="{% url 'accounts:login' %}" class="dropdown-item">LogIn</a>
-                </li>
-
-                <!-- Reset Password -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:password_reset' %}">Reset Password</a>
-                </li>
-
-                <!-- Change Password -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:chenge_password' %}">Change Password</a>
-                </li>
-
-                <!-- Delete Password -->
-                <li>
-                    <a class="dropdown-item text-danger" href="{% url 'accounts:delete' %}">Delete account</a>
-                </li>
-
+                <li><a class="dropdown-item" href="{% url 'accounts:signup' %}">SigUp</a></li>
+                <li><a href="{% url 'accounts:login' %}" class="dropdown-item">LogIn</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:password_reset' %}">Reset Password</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:chenge_password' %}">Change Password</a></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'accounts:delete' %}">Delete account</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
-
-                <!-- Logout -->
                 <li>
                     <form method="post" action="{% url 'accounts:logout' %}" style="margin: 0;">
                         {% csrf_token %}
@@ -74,10 +61,8 @@
                         </button>
                     </form>
                 </li>
-
             </ul>
         </li>
-
 
     </ul>
 </header>
