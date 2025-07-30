@@ -51,4 +51,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="change_password_complete.html"),
         name="change_password_success",
     ),
+    # User profile
+    path("account/<str:username>/", views.UserProfileView.as_view(), name="user-profile"),
+    path("users/", views.UserListView.as_view(), name="user-list"),
 ]

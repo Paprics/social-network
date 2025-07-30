@@ -7,6 +7,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("main.urls", namespace="main")),
     path("", include("accounts.urls", namespace="accounts")),
+    path("", include("messaging.urls", namespace="messaging")),
 ]
 
 # DEBUG TOOLBAR

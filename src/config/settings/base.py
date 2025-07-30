@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os
 # base.py
+import os
 from pathlib import Path
 
 import environ
@@ -20,16 +20,14 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Environ
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
@@ -39,6 +37,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -50,6 +49,7 @@ INSTALLED_APPS = [
     #
     "main.apps.MainConfig",
     "accounts.apps.AccountsConfig",
+    "messaging.apps.MessagingConfig",
 ]
 
 MIDDLEWARE = [
@@ -74,13 +74,15 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Custom processor
+                "messaging.context_processors.chats_processor",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
-
+# WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -151,7 +153,6 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "privet.poka@ukr.net"
-
 
 # DEBUG SEND MAIL INTO CONSOLE
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

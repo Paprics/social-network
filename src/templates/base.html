@@ -32,19 +32,28 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-                {% block main%}
+                {% block main %}
                 {% endblock %}
             </div>
         </div>
     </div>
 </main>
 
-<!--FOOTER -->
+<!-- FOOTER -->
+{# {% include 'footer.html' %} #}
 
 <!-- Подключение JS по CDN -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!--EXTRA BLOCK -->
+<!-- JAVASCRIPT BLOCK -->
+{% block javascript %}
+{# Здесь можно вставлять скрипты, специфичные для страниц #}
+{% endblock %}
+
+<!-- EXTRA BLOCK -->
+{% block extra %}
+{# Дополнительный блок для вставки, например, кастомных стилей или скриптов #}
+{% endblock %}
 
 </body>
 </html>

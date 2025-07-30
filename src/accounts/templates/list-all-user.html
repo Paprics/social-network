@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block main %}
+    {% for user in users %}
+        <a class="dropdown-item" href="{% url 'accounts:user-profile' user.username %}">
+            {{ user.get_full_name|default:user.username }} ({{ user.username }})
+        </a>
+        {% empty %}
+        <span class="dropdown-item-text text-muted">No users found</span>
+    {% endfor %}
+
+{% endblock %}

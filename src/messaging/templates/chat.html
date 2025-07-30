@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main %}
+
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      {% if chat_group.groupchat_name %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 text-light">{{ chat_group.groupchat_name }}</h2>
+
+          {% if user == chat_group.admin %}
+            <a href="#">
+              <button class="btn btn-outline-light btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                     fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                  <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0
+                           .708l-9.439 9.439-3.182.795a.5.5 0 0 1-.606-.606l.795-3.182L12.146.854zM11.207
+                           2L4 9.207V10h.793L13 3.793 11.207 2z"/>
+                </svg>
+              </button>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="card bg-dark shadow-lg" style="height: 45rem;">
+        <div class="card-header bg-secondary text-light sticky-top d-flex align-items-center gap-3">
+          {% if other_user %}
+            <span class="badge bg-success rounded-circle p-2" style="width: 12px; height: 12px;">&nbsp;</span>
+
+            <a href="#" class="d-flex align-items-center gap-2 text-decoration-none text-light flex-grow-1">
+              <img src="{{ other_user.profile.avatar }}" alt="avatar" class="rounded-circle"
+                   width="40" height="40" style="object-fit: cover;">
+              <div>
+                <strong>{{ other_user.profile.name }}</strong><br>
+                <small class="text-muted">@{{ other_user.username }}</small>
+              </div>
+            </a>
+
+          {% elif chat_group.groupchat_name %}
+            <ul class="list-inline mb-0 d-flex gap-2 overflow-auto flex-grow-1">
+              {% for member in chat_group.members.all %}
+                <li class="list-inline-item text-center flex-shrink-0">
+                  <a href="#" class="text-muted text-decoration-none d-block" style="width: 60px;">
+                    <img src="{% static 'img/no_avatar.png' %}" alt="avatar" width="40" height="40"
+                         class="rounded-circle mb-1" style="object-fit: cover;">
+                    <div style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      {{ member.profile.name|slice:":10" }}
+                    </div>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+
+          {% else %}
+            <span id="online-count" class="text-success fw-bold">0</span> online
+          {% endif %}
+        </div>
+
+        <div id="chat_container" class="card-body overflow-auto bg-black text-white d-flex flex-column" style="height: calc(45rem - 130px);">
+          <ul id="chat_messages" class="list-unstyled d-flex flex-column gap-3 mb-0">
+            {% for message in chat_messages reversed %}
+              {% include 'includes/_chat_message.html' %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="card-footer bg-secondary p-3">
+          <div class="d-flex align-items-center gap-2">
+
+            <form id="chat_file_form" enctype="multipart/form-data" action="#" method="post" class="m-0">
+              {% csrf_token %}
+              <label for="file_input" class="btn btn-outline-light mb-0" style="cursor: pointer;">
+                📎
+              </label>
+              <input type="file" name="file" id="file_input" class="d-none">
+            </form>
+
+            <form id="chat_message_form"
+                  hx-ext="ws"
+                  ws-connect="/ws/chatroom/{{ chat_group.group_name }}"
+                  ws-send
+                  hx-target="#chat_messages"
+                  hx-swap="beforeend"
+                  class="flex-grow-1 d-flex gap-2 m-0">
+              {% csrf_token %}
+              <input type="text" name="message" id="message_input" class="form-control rounded-pill"
+                     placeholder="Напишите сообщение...">
+              <button class="btn btn-primary rounded-circle p-2 d-flex align-items-center justify-content-center"
+                      type="button" ws-send style="width: 38px; height: 38px;">
+                ➤
+              </button>
+            </form>
+
+          </div>
+        </div>
+
+        {% if chat_group.members.exists %}
+          <a href="#" class="d-block mt-3 text-danger text-decoration-none"
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/dist/ws.js"></script>
+
+    <script>
+        // Функция для прокрутки чата вниз
+        function scrollToBottom(delay) {
+            const chatContainer = document.getElementById('chat_container');
+            if (chatContainer) {
+                // Используем небольшой таймаут, чтобы дать браузеру время для рендеринга нового контента
+                setTimeout(() => {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, delay || 0); // Задержка по умолчанию 0 мс, можно увеличить
+            }
+        }
+
+        // 📜 При загрузке страницы скроллим вниз (чтобы видеть последние сообщения)
+        document.addEventListener('DOMContentLoaded', () => {
+            scrollToBottom(50); // Небольшая задержка, чтобы элементы успели прогрузиться
+        });
+
+        // 📜 После отправки сообщения через WebSocket очищаем поле ввода и фокусируем его
+        // А также прокручиваем чат вниз, так как это ваше сообщение
+        document.getElementById('chat_message_form').addEventListener('htmx:wsAfterSend', () => {
+            const input = document.getElementById('message_input');
+            input.value = '';
+            input.focus();
+            scrollToBottom(50); // Прокручиваем после отправки своего сообщения
+        });
+
+        // --- Обработка сообщений, приходящих от других пользователей через WebSocket ---
+        // htmx-ext-ws отправляет событие 'htmx:wsAfterMessage' после получения сообщения
+        // и его вставки (если есть hx-target/hx-swap)
+        document.body.addEventListener('htmx:wsAfterMessage', (event) => {
+            // Если сообщение пришло, нужно прокрутить чат
+            // Важно: это событие срабатывает и для ваших сообщений, но уже после wsAfterSend
+            // Можно добавить проверку, если нужно различать:
+            // if (!event.detail.elt.closest('#chat_message_form')) { // Проверяем, что сообщение не от нашей формы
+            //    scrollToBottom(50);
+            // }
+            // В вашем случае, hx-target="#chat_messages" и hx-swap="beforeend" уже обрабатывают вставку
+            // сообщений, которые вы отправляете.
+            // Для сообщений, которые приходят от других пользователей, ваш Django Channels
+            // consumer должен отправлять HTML, который htmx вставит в #chat_messages.
+            // Если ваш consumer для ВСЕХ сообщений (включая чужие) отправляет HTML,
+            // то htmx:wsAfterMessage будет срабатывать и для них.
+            scrollToBottom(50); // Прокручиваем после получения ЛЮБОГО сообщения через WS
+        });
+
+
+    </script>
+
+{% endblock %}

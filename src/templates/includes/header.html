@@ -1,71 +1,97 @@
 <header class="d-flex justify-content-center py-3 bg-dark">
     <ul class="nav nav-pills">
 
-        <!-- Hello -->
-        {% if user.is_authenticated %}
-            <li class="nav-item nav-link text-white">Hello, {{ user.get_full_name }}!</li>
-            <li class="nav-item nav-link text-white">Hello, {{ user.profile.first_name }}!</li>
-        {% else %}
-            <li class="nav-item nav-link text-white">Hello, Guest!</li>
-        {% endif %}
-
-        <li class="nav-item"><a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
+        <li class="nav-item">
+            <a href="{% url 'main:index' %}" class="nav-link active text-white" aria-current="page">Home</a>
         </li>
-        <li class="nav-item"><a href="#" class="nav-link text-white">Search</a></li>
-        <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link text-white">Admin</a></li>
 
-        <li class="nav-item"><a href="#" class="nav-link text-white">Account</a></li>
+        <li class="nav-item">
+            <a href="#" class="nav-link text-white">Search</a>
+        </li>
 
-
-        <!-- Кнопка открытия модального окна Singup-->
-        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#signupModal">SignUp</a>
-        <!-- Модальное окно -->
-        {% include 'includes/signup_modal.html' %}
-
-        <!-- Кнопка открытия модального окна Login-->
-        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
-        <!-- Модальное окно -->
-        {% include 'includes/login_modal.html' %}
-
-        <!-- AUTH -->
+        <!-- 🔽 Message dropdown -->
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownMenuLink" role="button"
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
-                Auth
+                Messages
             </a>
-            <!-- ITEMS MENU -->
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuLink">
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="accountDropdown" style="min-width: 220px;">
 
-                <!-- SinUp -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:signup' %}">SigUp</a>
-                </li>
+                <!-- 📂 Заголовок Chat Rooms -->
+                <li><h6 class="dropdown-header text-uppercase">Chat Rooms</h6></li>
 
-                <!-- Login -->
-                <li>
-                    <a href="{% url 'accounts:login' %}" class="dropdown-item">LogIn</a>
-                </li>
+                <!-- ✅ Здесь список чатов -->
+                {% for room in chatrooms %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'messaging:chat' room.group_name %}">
+                            🌐 {{ room.title }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li><span class="dropdown-item-text text-muted">No public chats</span></li>
+                {% endfor %}
 
-                <!-- Reset Password -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:password_reset' %}">Reset Password</a>
-                </li>
-
-                <!-- Change Password -->
-                <li>
-                    <a class="dropdown-item" href="{% url 'accounts:chenge_password' %}">Change Password</a>
-                </li>
-
-                <!-- Delete Password -->
-                <li>
-                    <a class="dropdown-item text-danger" href="{% url 'accounts:delete' %}">Delete account</a>
-                </li>
-
+                <!-- ─────── Разделитель ─────── -->
                 <li>
                     <hr class="dropdown-divider">
                 </li>
 
-                <!-- Logout -->
+                <!-- 💬 Заголовок Dialogs -->
+                <li><h6 class="dropdown-header text-uppercase">Dialogs</h6></li>
+
+                <!-- ✅ Здесь список диалогов: -->
+                {% for dialog in dialogs %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'messaging:chat' dialog.chat.group_name %}">
+                            👥 {{ dialog.other_user.username }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li><span class="dropdown-item-text text-muted">No dialogs yet</span></li>
+                {% endfor %}
+
+            </ul>
+        </li>
+
+        <!-- 🔽 Account dropdown -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                Account
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="accountDropdown">
+
+                <li>
+                    {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'accounts:user-profile' user.username %}">My page</a>
+                    {% else %}
+                        <a class="dropdown-item disabled" href="#">My page</a>
+                    {% endif %}
+                </li>
+                <li><a class="dropdown-item" href="{% url 'accounts:user-list' %}">List All Users</a></li>
+
+            </ul>
+        </li>
+
+        <!-- 🔽 Auth dropdown -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownMenuLink" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                {% if user.is_authenticated %}
+                    {{ user.username }}
+                {% else %}
+                    Auth
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuLink">
+                <li><a class="dropdown-item" href="{% url 'accounts:signup' %}">SigUp</a></li>
+                <li><a href="{% url 'accounts:login' %}" class="dropdown-item">LogIn</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:password_reset' %}">Reset Password</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:chenge_password' %}">Change Password</a></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'accounts:delete' %}">Delete account</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
                 <li>
                     <form method="post" action="{% url 'accounts:logout' %}" style="margin: 0;">
                         {% csrf_token %}
@@ -75,10 +101,15 @@
                         </button>
                     </form>
                 </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:index' %}" class="nav-link text-white">Admin panel</a>
+                </li>
 
             </ul>
         </li>
-
 
     </ul>
 </header>
