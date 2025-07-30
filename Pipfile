@@ -10,6 +10,7 @@ django-environ = "*"
 django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
 channels = "*"
 daphne = "*"
+shortuuid = "*"
 
 [dev-packages]
 flake8 = "*"

@@ -1,8 +1,37 @@
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
+from django.views.generic.base import View
 
 from messaging.models import ChatGroup, GroupMessage
+
+User = get_user_model()
+
+
+class GetOrCreateDialogView(LoginRequiredMixin, View):
+    def get(self, request, username):
+        if request.user.username == username:
+            return redirect("main:index")
+
+        other_user = get_object_or_404(User, username=username)
+        # ищем приватный чат с этим пользователем
+        private_chats = request.user.chat_groups.filter(is_private=True)
+
+        chatroom = None
+        for chat in private_chats:
+            if other_user in chat.members.all():
+                chatroom = chat
+                break
+
+        # если нет — создаём новый
+        if not chatroom:
+            chatroom = ChatGroup.objects.create(is_private=True)
+            chatroom.members.add(request.user, other_user)
+
+        # ✅ РЕДИРЕКТ НА ПРАВИЛЬНЫЙ URL (name="chat")
+        return redirect("messaging:chat", room_name=chatroom.group_name)
 
 
 class ChatView(TemplateView):
@@ -11,23 +40,28 @@ class ChatView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Берём room_name из URL (chat/<room_name>/)
         room_name = self.kwargs.get("room_name")
-
-        # Ищем чат по этому имени или 404 если его нет
         chatroom = get_object_or_404(ChatGroup, group_name=room_name)
 
-        # Берём сообщения (самые свежие последние)
+        if chatroom.is_private:
+            # Проверка, что текущий пользователь — участник диалога
+            if self.request.user not in chatroom.members.all():
+                raise Http404("You are not a member of this private chat")
+
+            # Находим другого пользователя
+            other_user = chatroom.members.exclude(id=self.request.user.id).first()
+        else:
+            other_user = None  # В публичном чате нет "другого" пользователя
+
         messages = GroupMessage.objects.filter(group=chatroom).order_by("-created_at")
 
-        # Добавляем всё в контекст
         context.update(
             {
-                "room_name": room_name,  # чтобы можно было вставлять {{ room_name }}
-                "chatroom": chatroom,  # для твоего кода
-                "chat_group": chatroom,  # алиас, чтобы шаблон видел chat_group.*
-                "chat_messages": messages,  # сами сообщения
-                "other_user": None,  # заглушка для приватных чатов (пока нет логики)
+                "room_name": room_name,
+                "chatroom": chatroom,
+                "chat_group": chatroom,
+                "chat_messages": messages,
+                "other_user": other_user,
             }
         )
 

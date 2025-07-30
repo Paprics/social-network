@@ -1,3 +1,4 @@
+import shortuuid
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -5,14 +6,18 @@ USER = get_user_model()
 
 
 class ChatGroup(models.Model):
-    group_name = models.CharField(max_length=128, unique=True)
-    groupchat_name = models.CharField(max_length=128, blank=True, null=True)  # читаемое название для шаблона
-    admin = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True, blank=True)  # админ комнаты
-    members = models.ManyToManyField(USER, related_name="chat_groups", blank=True)  # все участники чата
+    group_name = models.CharField(max_length=128, unique=True, default=shortuuid.uuid)
+    title = models.CharField(max_length=128)
+    admin = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True, blank=True, related_name="admin_of_groups")
+    members = models.ManyToManyField(USER, related_name="chat_groups", blank=True)
     users_online = models.ManyToManyField(USER, blank=True, related_name="online_groups")
+    is_private = models.BooleanField(default=False)
 
     def __str__(self):
         return self.group_name
+
+    def get_other_user(self, current_user):
+        return self.members.exclude(id=current_user.id).first()
 
     class Meta:
         verbose_name = "Chat Group"

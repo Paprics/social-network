@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
 {% block main %}
-<h1>Ok</h1>
+    <h1>Page profile</h1>
+    <a href="{% url 'messaging:dialog' profile_user.username %}">chat with me</a>
+    {{ profile_user }}
+    {{ profile_user.username }}
 {% endblock %}
+

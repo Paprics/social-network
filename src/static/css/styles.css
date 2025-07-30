@@ -1,0 +1,4 @@
+/* Поднимаем дропдауны над чатами */
+.dropdown-menu {
+    z-index: 1050 !important; /* !important, чтобы перебить bootstrap, если надо */
+}

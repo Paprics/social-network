@@ -11,6 +11,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormView
+from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
 
@@ -18,11 +19,23 @@ from .forms import UserRegistrationForm
 
 User = get_user_model()
 
+
+class UserListView(ListView):
+    model = User
+    context_object_name = "users"
+    template_name = "list-all-user.html"
+
+
 class UserProfileView(DetailView):
     model = User
-    slug_field = "username"          # говорим Django, что slug = username
-    slug_url_kwarg = "username"      # это имя из URLconf
-    template_name = 'user_profile_detail.html'
+    slug_field = "username"  # говорим Django, что slug = username
+    slug_url_kwarg = "username"  # это имя из URLconf
+    template_name = "user_profile_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile_user"] = self.get_object()  # или как у тебя юзер называется
+        return context
 
 
 # RESET PASSWORD
