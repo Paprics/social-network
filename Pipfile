@@ -11,6 +11,7 @@ django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
 channels = "*"
 daphne = "*"
 shortuuid = "*"
+pillow = "*"
 
 [dev-packages]
 flake8 = "*"

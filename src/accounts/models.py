@@ -91,14 +91,12 @@ class UserProfileModel(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
-    gender = models.CharField(
-        max_length=1,
-        choices=Gender.choices,
-        blank=True,
-        verbose_name=_("gender"),
-    )
-    city = models.CharField(_("city"), max_length=150, blank=True)
+    gender = models.CharField(max_length=1, choices=Gender.choices, blank=True, verbose_name=_("gender"))
     date_of_birth = models.DateField(_("date of birth"), blank=True, null=True)
+    avatar = models.ImageField(_("avatar"), upload_to="avatars/", blank=True)
+    bio = models.TextField(_("bio"), blank=True)
+
+    # city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Profile of {self.user}"
