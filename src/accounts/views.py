@@ -10,7 +10,7 @@ from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic.base import RedirectView, View
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, FormView
+from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
@@ -18,6 +18,9 @@ from accounts.utils.utils import TokenGenerator, send_registration_email
 from .forms import UserRegistrationForm
 
 User = get_user_model()
+
+class UserProfileEditView(LoginRequiredMixin, UpdateView):
+    pass
 
 
 class UserListView(ListView):
@@ -28,13 +31,20 @@ class UserListView(ListView):
 
 class UserProfileView(DetailView):
     model = User
-    slug_field = "username"  # говорим Django, что slug = username
-    slug_url_kwarg = "username"  # это имя из URLconf
+    slug_field = "username"
+    slug_url_kwarg = "username"
     template_name = "user_profile_detail.html"
+
+    def get_queryset(self):
+        return User.objects.select_related(
+            "userprofilemodel__city__region__country"  # цепочка для джойнов, чтоб за 1 запрос подтянуть всё
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["profile_user"] = self.get_object()  # или как у тебя юзер называется
+        user = self.get_object()
+        context["profile_user"] = user
+        context["profile"] = getattr(user, "userprofilemodel", None)
         return context
 
 

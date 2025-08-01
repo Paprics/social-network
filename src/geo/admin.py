@@ -5,4 +5,8 @@ from .models import City, Country, Region, Subregion
 admin.site.register(Country)
 admin.site.register(Region)
 admin.site.register(Subregion)
-admin.site.register(City)
+
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    search_fields = ("name", "name_ru", "name_uk")

@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
+from geo.models import City
+
 from .managers import CustomUserManager
 
 
@@ -96,7 +98,14 @@ class UserProfileModel(models.Model):
     avatar = models.ImageField(_("avatar"), upload_to="avatars/", blank=True)
     bio = models.TextField(_("bio"), blank=True)
 
-    # city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    city = models.ForeignKey(
+        City,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("city of residence"),
+        related_name="residents",
+    )
 
     def __str__(self):
         return f"Profile of {self.user}"
