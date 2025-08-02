@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("main.urls", namespace="main")),
     path("", include("accounts.urls", namespace="accounts")),
     path("", include("messaging.urls", namespace="messaging")),
+    path("", include("geo.urls", namespace="geo")),
 ]
 
 # DEBUG TOOLBAR

@@ -2,3 +2,14 @@
 .dropdown-menu {
     z-index: 1050 !important; /* !important, чтобы перебить bootstrap, если надо */
 }
+
+
+.MyCustom {
+    color: #fff;
+    background-color: #6f42c1;
+    /* остальное как захочешь */
+}
+
+.MyCustom:hover {
+    background-color: #5a3799;
+}

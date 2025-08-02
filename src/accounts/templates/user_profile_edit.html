@@ -1,6 +1,324 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block main %}
-    <h1>OK</h1>
+    <div class="container mt-5" style="max-width: 720px;">
+        <h2 class="mb-4">Редактирование данных</h2>
 
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <!-- Чувствительные данные -->
+            <div class="mb-4">
+                <label for="username" class="form-label fw-bold">Username</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       value="{{ profile_user.username }}" required>
+                {% if form_user.username.errors %}
+                    <div class="text-danger small">
+                        {{ form_user.username.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="phone" class="form-label fw-bold">Номер телефона</label>
+                <input type="tel" id="phone" name="phone_number" class="form-control"
+                       value="{{ profile_user.phone_number|default:'' }}" required readonly>
+                {% if form_user.phone_number.errors %}
+                    <div class="text-danger small">
+                        {{ form_user.phone_number.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="email" class="form-label fw-bold">E-mail</label>
+                <input type="email" id="email" name="email" class="form-control"
+                       value="{{ profile_user.email }}" required readonly>
+                {% if form_user.email.errors %}
+                    <div class="text-danger small">
+                        {{ form_user.email.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <hr class="my-5">
+
+            <!-- Данные профиля -->
+            <div class="mb-4">
+                <label for="first_name" class="form-label fw-bold">Имя</label>
+                <input type="text" id="first_name" name="first_name" class="form-control"
+                       value="{{ profile.first_name|default:'' }}">
+                {% if form_profile.first_name.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.first_name.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="last_name" class="form-label fw-bold">Фамилия</label>
+                <input type="text" id="last_name" name="last_name" class="form-control"
+                       value="{{ profile.last_name|default:'' }}">
+                {% if form_profile.last_name.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.last_name.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="gender" class="form-label fw-bold">Пол</label>
+                <select id="gender" name="gender" class="form-select">
+                    <option value="" {% if not profile.gender %}selected{% endif %}>Не указан</option>
+                    <option value="M" {% if profile.gender == "M" %}selected{% endif %}>Мужской</option>
+                    <option value="F" {% if profile.gender == "F" %}selected{% endif %}>Женский</option>
+                </select>
+                {% if form_profile.gender.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.gender.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="date_of_birth" class="form-label fw-bold">Дата рождения</label>
+                <input type="date" id="date_of_birth" name="date_of_birth" class="form-control"
+                       value="{{ profile.date_of_birth|date:'Y-m-d'|default:'' }}">
+                {% if form_profile.date_of_birth.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.date_of_birth.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+{#            <div class="mb-4">#}
+{#                <label for="avatar" class="form-label fw-bold">Аватар</label>#}
+{#                <input type="file" id="avatar" name="avatar" class="form-control">#}
+{#                {% if profile.avatar %}#}
+{#                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-thumbnail mt-2"#}
+{#                         style="max-width: 150px;">#}
+{#                {% endif %}#}
+{#                {% if form_profile.avatar.errors %}#}
+{#                    <div class="text-danger small">#}
+{#                        {{ form_profile.avatar.errors|join:", " }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            </div>#}
+
+            <div class="mb-4">
+                <label for="bio" class="form-label fw-bold">О себе</label>
+                <textarea id="bio" name="bio" rows="4" class="form-control">{{ profile.bio|default:'' }}</textarea>
+                {% if form_profile.bio.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.bio.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- GEO -->
+            <div class="mb-3">
+                <label for="country" class="form-label fw-bold">Country</label>
+                <select id="country" name="country" class="form-select w-100">
+                    <option value="">Не указано</option>
+                    {% for country in countries %}
+                        <option value="{{ country.id }}"
+                                {% if profile.city and profile.city.country.id == country.id %}selected{% endif %}>
+                            {{ country.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form_profile.country.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.country.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="region" class="form-label fw-bold">Region</label>
+                <select id="region" name="region" class="form-select w-100">
+                    <option value="">Не указано</option>
+                    {% for region in regions %}
+                        <option value="{{ region.id }}"
+                                {% if profile.city and profile.city.region and profile.city.region.id == region.id %}selected{% endif %}>
+                            {{ region.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form_profile.region.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.region.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="subregion" class="form-label fw-bold">Subregion</label>
+                <select id="subregion" name="subregion" class="form-select w-100">
+                    <option value="">Не указано</option>
+                    {% for subregion in subregions %}
+                        <option value="{{ subregion.id }}"
+                                {% if profile.city and profile.city.subregion and profile.city.subregion.id == subregion.id %}selected{% endif %}>
+                            {{ subregion.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form_profile.subregion.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.subregion.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="city" class="form-label fw-bold">City</label>
+                <select id="city" name="city" class="form-select w-100">
+                    <option value="">Не указано</option>
+                    {% for city in cities %}
+                        <option value="{{ city.id }}"
+                                {% if profile.city and profile.city.id == city.id %}selected{% endif %}>
+                            {{ city.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form_profile.city.errors %}
+                    <div class="text-danger small">
+                        {{ form_profile.city.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="d-flex gap-2 mt-4 mb-5">
+                <button type="submit" class="btn btn-primary flex-grow-1">Сохранить изменения</button>
+                <a href="#" class="btn btn-secondary flex-grow-1">Отменить</a>
+            </div>
+
+        </form>
+    </div>
 {% endblock %}
+
+
+
+{% block javascript %}
+    <script>
+        // При выборе страны грузим регионы
+        const countrySelect = document.getElementById('country');
+        if (countrySelect) {
+            countrySelect.addEventListener('change', function () {
+                const countryId = this.value;
+
+                fetch(`/api/regions/${countryId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const regionSelect = document.getElementById('region');
+                        regionSelect.innerHTML = '<option value="">Не указано</option>';
+                        data.forEach(region => {
+                            const option = document.createElement('option');
+                            option.value = region.id;
+                            option.textContent = region.name;
+                            regionSelect.appendChild(option);
+                        });
+
+                        // Очистить сабрегион и город
+                        const subregionSelect = document.getElementById('subregion');
+                        if (subregionSelect) subregionSelect.innerHTML = '<option value="">Не указано</option>';
+
+                        const citySelect = document.getElementById('city');
+                        if (citySelect) citySelect.innerHTML = '<option value="">Не указано</option>';
+                    })
+                    .catch(err => console.error('Ошибка при загрузке регионов:', err));
+            });
+        }
+
+        // При выборе региона грузим сабрегионы
+        const regionSelect = document.getElementById('region');
+        if (regionSelect) {
+            regionSelect.addEventListener('change', function () {
+                const regionId = this.value;
+
+                fetch(`/api/subregions/${regionId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const subregionSelect = document.getElementById('subregion');
+                        subregionSelect.innerHTML = '<option value="">Не указано</option>';
+                        (data.subregions || []).forEach(subregion => {
+                            const option = document.createElement('option');
+                            option.value = subregion.id;
+                            option.textContent = subregion.name;
+                            subregionSelect.appendChild(option);
+                        });
+
+                        // Очистить город
+                        const citySelect = document.getElementById('city');
+                        if (citySelect) citySelect.innerHTML = '<option value="">Не указано</option>';
+                    })
+                    .catch(err => console.error('Ошибка при загрузке сабрегионов:', err));
+            });
+        }
+
+        // При выборе сабрегиона грузим города
+        const subregionSelect = document.getElementById('subregion');
+        if (subregionSelect) {
+            subregionSelect.addEventListener('change', function () {
+                const subregionId = this.value;
+
+                fetch(`/api/cities_by_subregion/${subregionId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const citySelect = document.getElementById('city');
+                        citySelect.innerHTML = '<option value="">Не указано</option>';
+                        data.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.id;
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+                    })
+                    .catch(err => console.error('Ошибка при загрузке городов:', err));
+            });
+        }
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+{#{% block javascript %}#}
+{#    <script>#}
+{#        const countrySelect = document.getElementById('country');#}
+{#        if (countrySelect) {#}
+{#            countrySelect.addEventListener('change', function () {#}
+{#                const countryId = this.value;#}
+{##}
+{#                fetch(`/api/regions/${countryId}/`)#}
+{#                    .then(response => response.json())#}
+{#                    .then(data => {#}
+{#                        const regionSelect = document.getElementById('region');#}
+{#                        regionSelect.innerHTML = '<option value="">Не указано</option>';#}
+{#                        data.forEach(region => {#}
+{#                            const option = document.createElement('option');#}
+{#                            option.value = region.id;#}
+{#                            option.textContent = region.name;#}
+{#                            regionSelect.appendChild(option);#}
+{#                        });#}
+{##}
+{#                        // Очистить сабрегион и город#}
+{#                        const subregionSelect = document.getElementById('subregion');#}
+{#                        if (subregionSelect) subregionSelect.innerHTML = '<option value="">Не указано</option>';#}
+{##}
+{#                        const citySelect = document.getElementById('city');#}
+{#                        if (citySelect) citySelect.innerHTML = '<option value="">Не указано</option>';#}
+{#                    })#}
+{#                    .catch(err => console.error('Ошибка при загрузке регионов:', err));#}
+{#            });#}
+{#        }#}
+{#    </script>#}
+{#{% endblock %}#}
+
