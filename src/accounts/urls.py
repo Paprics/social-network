@@ -52,6 +52,7 @@ urlpatterns = [
         name="change_password_success",
     ),
     # User profile
-    path("account/<str:username>/", views.UserProfileView.as_view(), name="user-profile"),
+    path("profile/<str:username>/", views.UserProfileView.as_view(), name="user-profile"),
+    path("profile/<str:username>/edit/", views.UserProfileEditView.as_view(), name="user-profile-edit"),
     path("users/", views.UserListView.as_view(), name="user-list"),
 ]

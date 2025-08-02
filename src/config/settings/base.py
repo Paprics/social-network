@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "main.apps.MainConfig",
     "accounts.apps.AccountsConfig",
     "messaging.apps.MessagingConfig",
+    "geo.apps.GeoConfig",
 ]
 
 MIDDLEWARE = [
@@ -156,3 +157,10 @@ DEFAULT_FROM_EMAIL = "privet.poka@ukr.net"
 
 # DEBUG SEND MAIL INTO CONSOLE
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Location
+LANGUAGE_CODE = "uk"
+TIME_ZONE = "Europe/Kyiv"
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True

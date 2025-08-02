@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 
+from accounts.models import UserProfileModel
+
 User = get_user_model()
 
 
@@ -28,3 +30,15 @@ class LoginForm(forms.ModelForm):
     class Meta:
         model = get_user_model()
         fields = ["phone_number"]
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfileModel
+        exclude = ["user"]
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "email", "phone_number"]

@@ -1,9 +1,100 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block main %}
-    <h1>Page profile</h1>
-    <a href="{% url 'messaging:dialog' profile_user.username %}">chat with me</a>
-    {{ profile_user }}
-    {{ profile_user.username }}
-{% endblock %}
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Левая колонка: аватар + кнопка -->
+            <div class="col-md-3 text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-fluid rounded mb-3"
+                         style="max-height: 200px;">
+                {% else %}
+                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar" class="img-fluid rounded mb-3"
+                         style="max-height: 200px;">
+                {% endif %}
 
+                <!-- кнопка add friend -->
+                <a href="#" class="btn btn-secondary w-100 mt-1">
+                    Змінити фото профіля
+                </a>
+
+                <a href="#" class="btn btn-secondary w-100 mt-1">
+                    Добавить в друзья
+                </a>
+
+                {% if profile_user.username %}
+                    <a href="{% url 'messaging:dialog' profile_user.username %}" class="btn btn-primary w-100 mt-1">Chat
+                        со
+                        мной</a>
+                {% else %}
+                    <button class="btn btn-secondary w-100 mt-1" disabled>Нет username для чата</button>
+                {% endif %}
+
+                <a href="{% url "accounts:user-profile-edit" profile_user.username %}"
+                   class="btn btn-secondary w-100 mt-1">
+                    Редактировать страницу
+                </a>
+
+                <a href="#" class="btn btn-secondary w-100 mt-1">
+                    Додати до обраного
+                </a>
+
+            </div>
+
+            <!-- Правая колонка: информация -->
+            <div class="col-md-9">
+                <h2>@{{ profile_user.username }}</h2>
+                <hr>
+                <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}
+                    {{ profile.last_name|default:"" }}</p>
+                <p><strong>Пол:</strong>
+                    {% if profile.gender == "M" %} Мужской
+                    {% elif profile.gender == "F" %} Женский
+                    {% else %} Не указан
+                    {% endif %}
+                </p>
+                <p>
+                    <strong>Активність:</strong>
+                    {% if profile_user.last_login %}
+                        {{ profile_user.last_login|timesince }} тому
+                    {% else %}
+                        Немає даних
+                    {% endif %}
+                </p>
+
+                <!-- Блок с локацией -->
+                <p><strong>Страна:</strong>
+                    {% if profile.city and profile.city.country %}
+                        {{ profile.city.country.name|default:"Не указана" }}
+                    {% else %}
+                        Не указана
+                    {% endif %}
+                </p>
+
+                <p><strong>Регион:</strong>
+                    {% if profile.city and profile.city.region %}
+                        {{ profile.city.region.name|default:"Не указан" }}
+                    {% else %}
+                        Не указан
+                    {% endif %}
+                </p>
+
+                <p><strong>Город:</strong>
+                    {% if profile.city %}
+                        {{ profile.city.name|default:"Не указан" }}
+                    {% else %}
+                        Не указан
+                    {% endif %}
+                </p>
+
+                <p><strong>Дата рождения:</strong> {{ profile.date_of_birth|date:"d.m.Y"|default:"Не указана" }}</p>
+                <p><strong>О себе:</strong> {{ profile.bio|default:"Пусто" }}</p>
+
+                <hr>
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
