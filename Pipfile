@@ -12,6 +12,8 @@ channels = "*"
 daphne = "*"
 shortuuid = "*"
 pillow = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+channels-redis = "*"
 
 [dev-packages]
 flake8 = "*"

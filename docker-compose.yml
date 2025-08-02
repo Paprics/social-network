@@ -1,0 +1,93 @@
+services:
+
+  backend:
+    container_name: backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: backend
+    working_dir: /app/src
+    ports:
+      - "${LOCAL_PORT}:${REMOTE_PORT}"
+    volumes:
+      - ./src:/app/src
+      - ./commands:/app/commands
+      - ./src/static:/app/src/static
+      - ./src/media:/app/src/media
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: ['sh', '/app/commands/start_server_${MODE}.sh']
+    depends_on:
+      - redis
+      - postgres_db
+
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.19
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./src/static:/app/src/static
+      - ./src/media:/app/src/media
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  redis:
+     container_name: redis
+     image: redis
+     ports:
+       - "6379:6379"
+     env_file:
+       - .env
+     restart: on-failure
+
+  redis_commander:
+     container_name: redis_commander
+     image: rediscommander/redis-commander:latest
+     restart: always
+     env_file:
+       - .env
+     environment:
+       - REDIS_HOSTS=main:redis:6379
+     ports:
+       - "8081:8081"
+     depends_on:
+       - redis
+
+  postgres_db:
+    container_name: backend_db
+    image: postgres:17.5
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pg_admin:
+      image: dpage/pgadmin4
+      container_name: pgadmin_container
+      restart: on-failure
+      env_file:
+        - .env
+      ports:
+        - "5050:80"
+      volumes:
+        - pg_admin:/var/lib/pgadmin
+      depends_on:
+        - postgres_db
+
+
+volumes:
+  static_content: { }
+  media_content: { }
+  postgres_data: { }
+  pg_admin: { }
