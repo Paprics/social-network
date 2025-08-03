@@ -48,13 +48,13 @@ else:
     }
 
 # message broker для Django Channels
-if os.environ.get("MODE_CHANNEL_LAYERS") == '0':
+if os.environ.get("MODE_CHANNEL_LAYERS") == "0":
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer",
         }
     }
-elif os.environ.get("MODE_CHANNEL_LAYERS") == '1':
+elif os.environ.get("MODE_CHANNEL_LAYERS") == "1":
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -93,11 +93,11 @@ elif os.environ.get("DOCKER_ENV") == "1":
         }
     }
 elif os.environ.get("MODE_DATABASE") == "0":
-    # По умолчанию SQLite (чисто для разработки без всего)
+    # По умолчанию SQLite (для разработки без всего)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",  # noqa 405
         }
     }
 elif os.environ.get("MODE_DATABASE") == "1":
