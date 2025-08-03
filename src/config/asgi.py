@@ -2,24 +2,25 @@
 import os
 
 import django
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.security.websocket import AllowedHostsOriginValidator
-from django.core.asgi import get_asgi_application
 
-import messaging.routing
-from config.settings.base import env  # импортируем env для работы с .env
+from config.settings.base import env
 
-# Подтягиваем MODE из .env (если не задано – используем 'dev')
+# Настраиваем Django до импорта зависимостей
 mode = env("MODE", default="dev")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"config.settings.{mode}")
-
-# Явно инициализируем Django (чтобы избежать сюрпризов при импортах)
 django.setup()
+
+# локальные импорты (flake8 не будет ругаться, потому что мы делаем это явно)
+from channels.auth import AuthMiddlewareStack  # noqa: E402
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from channels.security.websocket import \
+    AllowedHostsOriginValidator  # noqa: E402
+from django.core.asgi import get_asgi_application  # noqa: E402
+
+import messaging.routing  # noqa: E402
 
 # Django-приложение (обслуживает HTTP)
 django_asgi_app = get_asgi_application()
-
 
 # Главная точка входа для Daphne/Channels
 application = ProtocolTypeRouter(
