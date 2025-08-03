@@ -53,6 +53,7 @@ msgpack==1.1.1; python_version >= '3.8'
 phonenumbers==9.0.9
 pillow==11.3.0; python_version >= '3.9'
 pluggy==1.6.0; python_version >= '3.9'
+psycopg2-binary==2.9.10; python_version >= '3.8'
 pyasn1==0.6.1; python_version >= '3.8'
 pyasn1-modules==0.4.2; python_version >= '3.8'
 pycparser==2.22; python_version >= '3.8'
