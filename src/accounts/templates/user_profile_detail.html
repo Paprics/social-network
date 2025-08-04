@@ -7,11 +7,11 @@
             <!-- Левая колонка: аватар + кнопка -->
             <div class="col-md-3 text-center">
                 {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-fluid rounded mb-3"
-                         style="max-height: 200px;">
+                    <img src="{{ profile.avatar.url }}" alt="Avatar"
+                         class="img-fluid rounded w-100 mb-3">
                 {% else %}
-                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar" class="img-fluid rounded mb-3"
-                         style="max-height: 200px;">
+                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar"
+                         class="img-fluid rounded w-100 mb-3">
                 {% endif %}
 
                 <!-- кнопка add friend -->
@@ -19,19 +19,23 @@
                     Змінити фото профіля
                 </a>
 
-                <a href="#" class="btn btn-secondary w-100 mt-1">
-                    Добавить в друзья
-                </a>
+                <form method="post" action="/friend/send/">
+                    {% csrf_token %}
+                    <input type="hidden" name="to_user_id" value="{{ user.id }}">
+                    <button type="submit" class="btn btn-secondary w-100 mt-1">
+                        Додати до друзів
+                    </button>
+                </form>
 
-                {% if profile_user.username %}
-                    <a href="{% url 'messaging:dialog' profile_user.username %}" class="btn btn-primary w-100 mt-1">Chat
+                {% if user.username %}
+                    <a href="{% url 'messaging:dialog' user.username %}" class="btn btn-primary w-100 mt-1">Chat
                         со
                         мной</a>
                 {% else %}
                     <button class="btn btn-secondary w-100 mt-1" disabled>Нет username для чата</button>
                 {% endif %}
 
-                <a href="{% url "accounts:user-profile-edit" profile_user.username %}"
+                <a href="{% url "accounts:user-profile-edit" user.username %}"
                    class="btn btn-secondary w-100 mt-1">
                     Редактировать страницу
                 </a>
@@ -40,11 +44,15 @@
                     Додати до обраного
                 </a>
 
+                <a href="#" class="btn btn-danger w-100 mt-1">
+                    Заблокувати користувача
+                </a>
+
             </div>
 
             <!-- Правая колонка: информация -->
             <div class="col-md-9">
-                <h2>@{{ profile_user.username }}</h2>
+                <h2>@{{ user.username }}</h2>
                 <hr>
                 <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}
                     {{ profile.last_name|default:"" }}</p>

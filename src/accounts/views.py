@@ -14,6 +14,7 @@ from django.views.generic.edit import CreateView, DeleteView, FormView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
+from friends.models import FriendShipModel, FriendRequestModel, BlockModel
 from geo.models import City, Country, Region, Subregion
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
@@ -47,7 +48,7 @@ class UserProfileEditView(LoginRequiredMixin, View):
             request,
             self.template_name,
             {
-                "profile_user": user,
+                "user": user,
                 "profile": profile,
                 "form_user": form_user,
                 "form_profile": form_profile,
@@ -96,7 +97,7 @@ class UserProfileEditView(LoginRequiredMixin, View):
                 request,
                 self.template_name,
                 {
-                    "profile_user": user,
+                    "user": user,
                     "profile": profile,
                     "form_user": form_user,
                     "form_profile": form_profile,
@@ -125,11 +126,61 @@ class UserProfileView(DetailView):
             "userprofilemodel__city__region__country"  # цепочка для джойнов, чтоб за 1 запрос подтянуть всё
         )
 
+        friends_status = FriendShipModel.object.filter().exists()
+        friends_request_status = FriendRequestModel.object.filter().exists()
+        block_status = BlockModel.object.filter().exists()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.get_object()
-        context["profile_user"] = user
-        context["profile"] = getattr(user, "userprofilemodel", None)
+        profile_user = self.get_object()
+        current_user = self.request.user
+
+        context["user"] = profile_user
+        context["profile"] = getattr(profile_user, "userprofilemodel", None)
+
+        if not current_user.is_authenticated:
+            # Аноним, статусы по умолчанию
+            context["is_friends"] = False
+            context["request_sent"] = False
+            context["request_received"] = False
+            context["blocked_by_current_user"] = False
+            context["blocked_by_profile_user"] = False
+            return context
+
+        # --- Статусы  ---
+        is_friends = FriendShipModel.objects.filter(
+            user1=current_user, user2=profile_user
+        ).exists() or FriendShipModel.objects.filter(
+            user1=profile_user, user2=current_user
+        ).exists()
+
+        # Отправлена заявка от current_user к profile_user?
+        request_sent = FriendRequestModel.objects.filter(
+            from_user=current_user, to_user=profile_user, status="pending"
+        ).exists()
+
+        # Получена заявка от profile_user?
+        request_received = FriendRequestModel.objects.filter(
+            from_user=profile_user, to_user=current_user, status="pending"
+        ).exists()
+
+        # Заблокирован ли ?
+        blocked_by_current_user = BlockModel.objects.filter(
+            blocker=current_user, blocked=profile_user
+        ).exists()
+
+        blocked_by_profile_user = BlockModel.objects.filter(
+            blocker=profile_user, blocked=current_user
+        ).exists()
+
+
+        context["is_friends"] = is_friends
+        context["request_sent"] = request_sent
+        context["request_received"] = request_received
+
+        context["blocked_by_current_user"] = blocked_by_current_user
+        context["blocked_by_profile_user"] = blocked_by_profile_user
+
         return context
 
 
