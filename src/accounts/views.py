@@ -4,7 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
-from django.http.response import HttpResponseRedirect
+from django.db.models.query_utils import Q
+from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
@@ -25,6 +26,14 @@ User = get_user_model()
 
 class UserProfileEditView(LoginRequiredMixin, View):
     template_name = "user_profile_edit.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        username = kwargs.get("username")
+
+        if username != request.user.username:
+            return HttpResponseForbidden("Nice try, but no.")
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         user = get_object_or_404(User, username=kwargs.get("username"))
@@ -119,24 +128,28 @@ class UserProfileView(DetailView):
     model = User
     slug_field = "username"
     slug_url_kwarg = "username"
-    template_name = "user_profile_detail.html"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._target_user = None
+
+    def get_object(self, *args, **kwargs):
+        if self._target_user is None:
+            self._target_user = super().get_object(*args, **kwargs)
+        return self._target_user
 
     def get_queryset(self):
         return User.objects.select_related(
             "userprofilemodel__city__region__country"  # цепочка для джойнов, чтоб за 1 запрос подтянуть всё
         )
 
-        friends_status = FriendShipModel.object.filter().exists()
-        friends_request_status = FriendRequestModel.object.filter().exists()
-        block_status = BlockModel.object.filter().exists()
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profile_user = self.get_object()
-        current_user = self.request.user
 
-        context["user"] = profile_user
-        context["profile"] = getattr(profile_user, "userprofilemodel", None)
+        target_user = self.get_object()
+        context["target_user"] = target_user
+
+        current_user = self.request.user
 
         if not current_user.is_authenticated:
             # Аноним, статусы по умолчанию
@@ -149,28 +162,26 @@ class UserProfileView(DetailView):
 
         # --- Статусы  ---
         is_friends = FriendShipModel.objects.filter(
-            user1=current_user, user2=profile_user
-        ).exists() or FriendShipModel.objects.filter(
-            user1=profile_user, user2=current_user
+            Q(user1=current_user, user2=target_user) | Q(user1=target_user, user2=current_user)
         ).exists()
 
-        # Отправлена заявка от current_user к profile_user?
+        # Отправлена заявка от current_user к object_user?
         request_sent = FriendRequestModel.objects.filter(
-            from_user=current_user, to_user=profile_user, status="pending"
+            from_user=current_user, to_user=target_user, status="pending"
         ).exists()
 
-        # Получена заявка от profile_user?
+        # Получена заявка от object_user?
         request_received = FriendRequestModel.objects.filter(
-            from_user=profile_user, to_user=current_user, status="pending"
+            from_user=target_user, to_user=current_user, status="pending"
         ).exists()
 
         # Заблокирован ли ?
         blocked_by_current_user = BlockModel.objects.filter(
-            blocker=current_user, blocked=profile_user
+            blocker=current_user, blocked=target_user
         ).exists()
 
-        blocked_by_profile_user = BlockModel.objects.filter(
-            blocker=profile_user, blocked=current_user
+        blocked_by_object_user = BlockModel.objects.filter(
+            blocker=target_user, blocked=current_user
         ).exists()
 
 
@@ -179,9 +190,17 @@ class UserProfileView(DetailView):
         context["request_received"] = request_received
 
         context["blocked_by_current_user"] = blocked_by_current_user
-        context["blocked_by_profile_user"] = blocked_by_profile_user
+        context["blocked_by_object_user"] = blocked_by_object_user
 
         return context
+
+    def get_template_names(self):
+        current_user = self.request.user
+        target_user = self.get_object() #TODO Dublicate
+
+        if current_user.id == target_user.id:
+            return ["user_own_profile_detail.html"]
+        return ["user_profile_detail.html"]
 
 
 # RESET PASSWORD

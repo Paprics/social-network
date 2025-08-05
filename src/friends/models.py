@@ -15,7 +15,6 @@ class FriendRequestModel(models.Model):
 
     class StatusModel(models.TextChoices):
         PENDING = "pending", "Pending"
-        ACCEPTED = "accepted", "Accepted"
         DECLINED = "declined", "Declined"
 
     status = models.CharField(
@@ -45,6 +44,13 @@ class FriendShipModel(models.Model):
 
     def __str__(self):
         return f"{self.user1} ↔ {self.user2}"
+
+    def save(self, *args, **kwargs):
+        # Сортировка пользователей по id: user1 < user2
+        if self.user1.id > self.user2.id:
+            self.user1, self.user2 = self.user2, self.user1
+        super().save(*args, **kwargs)
+
 
 
 class BlockModel(models.Model):
