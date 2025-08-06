@@ -40,7 +40,7 @@
                         </button>
                     </form>
                 {% else %}
-                    <form method="post" action="/friend/send/">
+                    <form method="post" action="{% url 'friends:send_friend' %}">
                         {% csrf_token %}
                         <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
                         <button type="submit" class="btn btn-secondary w-100 mt-1">
@@ -51,7 +51,7 @@
 
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'messaging:dialog' user.username %}" class="btn btn-primary w-100 mt-1">
+                    <a href="{% url 'messaging:dialog' target_user.username %}" class="btn btn-primary w-100 mt-1">
                         Chat со мной
                     </a>
                 {% else %}
