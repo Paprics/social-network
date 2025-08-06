@@ -8,6 +8,17 @@ User = get_user_model()
 
 
 class FriendService:
+    def decline_request(self, from_user, to_user):
+        try:
+            friend_request = FriendRequestModel.objects.get(from_user=from_user, to_user=to_user)
+        except FriendRequestModel.DoesNotExist:
+            raise ValueError("Friend request not found")
+
+        friend_request.status = FriendRequestModel.StatusModel.DECLINED
+        friend_request.save()
+
+
+
     def accept_friend_request(self, to_user, from_user):
         """
         to_user — тот, кто принимает (request.user),
@@ -47,7 +58,7 @@ class FriendService:
         except FriendRequestModel.DoesNotExist:
             raise ValueError("Заявка на дружбу не найдена или уже отменена")
 
-    def reject_request(self, from_user, to_user): ...
+
 
     # Отклоняем заявку
 

@@ -39,6 +39,14 @@
                             Підтвердити дружбу
                         </button>
                     </form>
+
+                    <form method="post" action="{% url 'friends:decline_friend' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="from_user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-warning w-100 mt-1">
+                            Відхилити запит
+                        </button>
+                    </form>
                 {% else %}
                     <form method="post" action="{% url 'friends:send_friend' %}">
                         {% csrf_token %}

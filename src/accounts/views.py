@@ -167,12 +167,12 @@ class UserProfileView(DetailView):
 
         # Отправлена заявка от current_user к object_user?
         request_sent = FriendRequestModel.objects.filter(
-            from_user=current_user, to_user=target_user, status="pending"
+            from_user=current_user, to_user=target_user
         ).exists()
 
         # Получена заявка от object_user?
         request_received = FriendRequestModel.objects.filter(
-            from_user=target_user, to_user=current_user, status="pending"
+            from_user=target_user, to_user=current_user
         ).exists()
 
         # Заблокирован ли ?

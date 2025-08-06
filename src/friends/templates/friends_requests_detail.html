@@ -1,39 +1,56 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <h2>Friends</h2>
+    <h2>🧑‍🤝‍🧑 Friends</h2>
     <ul>
         {% for friend in friends %}
             <li>{{ friend.username }}</li>
-            {% empty %}
+        {% empty %}
             <li>No friends yet.</li>
         {% endfor %}
     </ul>
+    <hr>
 
-    <h2>Incoming Requests</h2>
+    <h2>🆕 New Incoming Requests</h2>
     <ul>
         {% for req in incoming_requests %}
-            <li>{{ req.from_user.username }} —
-                <form method="post" action="{% url 'friends:accept_friend' %}">{% csrf_token %}
-                    <input type="hidden" name="to_user_id" value="{{ req.from_user.id }}">
-                    <button type="submit">Accept</button>
-                </form>
-            </li>
-            {% empty %}
+            {% if req.status == "pending" %}
+                <li>{{ req.from_user.username }} —
+                    <form method="post" action="{% url 'friends:accept_friend' %}">{% csrf_token %}
+                        <input type="hidden" name="to_user_id" value="{{ req.from_user.id }}">
+                        <button type="submit">Accept</button>
+                    </form>
+                </li>
+            {% endif %}
+        {% empty %}
             <li>No incoming requests.</li>
         {% endfor %}
     </ul>
+    <hr>
 
-    <h2>Outgoing Requests</h2>
+    <h2>🚫 Declined Requests</h2>
+    <ul>
+        {% for req in incoming_requests %}
+            {% if req.status == "declined" %}
+                <li>{{ req.from_user.username }} — Declined</li>
+            {% endif %}
+        {% empty %}
+            <li>No declined requests.</li>
+        {% endfor %}
+    </ul>
+    <hr>
+
+    <h2>📤 Outgoing Requests</h2>
     <ul>
         {% for req in outgoing_requests %}
             <li>{{ req.to_user.username }}</li>
-            {% empty %}
+        {% empty %}
             <li>No outgoing requests.</li>
         {% endfor %}
     </ul>
+    <hr>
 
-    <h2>People You May Know</h2>
+    <h2>🔍 People You May Know</h2>
     <ul>
         {% for user in suggestions %}
             <li>{{ user.username }} —
@@ -42,8 +59,9 @@
                     <button type="submit">Add Friend</button>
                 </form>
             </li>
-            {% empty %}
+        {% empty %}
             <li>No suggestions.</li>
         {% endfor %}
     </ul>
+    <hr>
 {% endblock %}

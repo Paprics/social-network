@@ -6,12 +6,33 @@ from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.base import View
 
-from .models import FriendShipModel, FriendRequestModel
+from .models import FriendRequestModel, FriendShipModel
 from .services import FriendService
 
 User = get_user_model()
 
 
+# Chenge status request
+class DeclineFriendRequestView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        from_user_id = request.POST.get("from_user_id")
+
+        if not from_user_id or not from_user_id.isdigit():
+            return JsonResponse({"error": "Invalid from_user_id"}, status=400)
+
+        from_user = get_object_or_404(User, id=int(from_user_id))
+        to_user = request.user
+
+        service = FriendService()
+        try:
+            service.decline_request(from_user, to_user)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+# Send request
 class SendFriendRequestView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         to_user_id = request.POST.get("to_user_id")
@@ -52,9 +73,7 @@ class RetractFriendRequestView(LoginRequiredMixin, View):
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
-class DeclineFriendRequestView(LoginRequiredMixin, View): ...
-
-
+# Accept request
 class AcceptFriendRequestView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         to_user_id = request.POST.get("to_user_id")
@@ -76,6 +95,7 @@ class AcceptFriendRequestView(LoginRequiredMixin, View):
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
+# Remove request
 class RemoveFriendView(LoginRequiredMixin, View): ...
 
 
@@ -111,4 +131,3 @@ class FriendsDetailView(View):
             "suggestions": suggestions,
         }
         return render(request, self.template_name, context)
-
