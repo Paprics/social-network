@@ -15,16 +15,16 @@
                 {% endif %}
 
                 <!-- кнопка friends -->
-                {% if is_friend %}
+                {% if is_friends %}
                     <form method="post" action="#">
                         {% csrf_token %}
                         <input type="hidden" name="#" value="#">
-                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                        <button type="submit" class="btn btn-danger w-100 mt-1">
                             Видалити з друзів
                         </button>
                     </form>
                 {% elif request_sent %}
-                    <form method="post" action="/friend/retract/">
+                    <form method="post" action="{% url 'friends:retract_friend' %}">
                         {% csrf_token %}
                         <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
                         <button type="submit" class="btn btn-secondary w-100 mt-1">

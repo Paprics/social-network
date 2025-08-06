@@ -1,21 +1,16 @@
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
 from faker import Faker
-import random
 
 User = get_user_model()
 faker = Faker()
+
 
 class Command(BaseCommand):
     help = "Генерирует фейковых пользователей для тестов и наполнения базы"
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--count",
-            type=int,
-            default=10,
-            help="Сколько пользователей создать (по умолчанию 10)"
-        )
+        parser.add_argument("--count", type=int, default=10, help="Сколько пользователей создать (по умолчанию 10)")
 
     def handle(self, *args, **options):
         count = options["count"]
@@ -26,11 +21,11 @@ class Command(BaseCommand):
             phone_number = faker.phone_number()
 
             # Создаём юзера
-            user = User.objects.create_user(
-                username=username,
+            user = User.objects.create_user(  # noqa 841
+                username=username,  # noqa 401
                 email=email,
                 phone_number=phone_number,
-                password="test12345"  # дефолтный пароль для всех
+                password="test12345",  # дефолтный пароль для всех
             )
 
             # # Если у модели User есть доп. поля — заполняем

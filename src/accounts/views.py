@@ -5,7 +5,7 @@ from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
 from django.db.models.query_utils import Q
-from django.http.response import HttpResponseRedirect, HttpResponseForbidden
+from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_decode
@@ -15,7 +15,7 @@ from django.views.generic.edit import CreateView, DeleteView, FormView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
-from friends.models import FriendShipModel, FriendRequestModel, BlockModel
+from friends.models import BlockModel, FriendRequestModel, FriendShipModel
 from geo.models import City, Country, Region, Subregion
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
@@ -176,14 +176,9 @@ class UserProfileView(DetailView):
         ).exists()
 
         # Заблокирован ли ?
-        blocked_by_current_user = BlockModel.objects.filter(
-            blocker=current_user, blocked=target_user
-        ).exists()
+        blocked_by_current_user = BlockModel.objects.filter(blocker=current_user, blocked=target_user).exists()
 
-        blocked_by_object_user = BlockModel.objects.filter(
-            blocker=target_user, blocked=current_user
-        ).exists()
-
+        blocked_by_object_user = BlockModel.objects.filter(blocker=target_user, blocked=current_user).exists()
 
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent
@@ -196,7 +191,7 @@ class UserProfileView(DetailView):
 
     def get_template_names(self):
         current_user = self.request.user
-        target_user = self.get_object() #TODO Dublicate
+        target_user = self.get_object()  # TODO Dublicate
 
         if current_user.id == target_user.id:
             return ["user_own_profile_detail.html"]
