@@ -36,7 +36,7 @@ class FriendShipModel(models.Model):
         return f"{self.user1} ↔ {self.user2}"
 
     def save(self, *args, **kwargs):
-        # Сортировка пользователей по id: user1 < user2
+        # Автосортировка: user1 всегда с меньшим id
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
         super().save(*args, **kwargs)

@@ -8,6 +8,17 @@ User = get_user_model()
 
 
 class FriendService:
+    def remove_friend(self, user_a, user_b):
+        """Удаляет дружбу между двумя пользователями, не зависит от порядка."""
+        friendship = FriendShipModel.objects.filter(
+            Q(user1=user_a, user2=user_b) | Q(user1=user_b, user2=user_a)
+        ).first()
+
+        if not friendship:
+            raise ValidationError("Friendship does not exist")
+
+        friendship.delete()
+
     def decline_request(self, from_user, to_user):
         try:
             friend_request = FriendRequestModel.objects.get(from_user=from_user, to_user=to_user)
@@ -16,8 +27,6 @@ class FriendService:
 
         friend_request.status = FriendRequestModel.StatusModel.DECLINED
         friend_request.save()
-
-
 
     def accept_friend_request(self, to_user, from_user):
         """
@@ -58,13 +67,20 @@ class FriendService:
         except FriendRequestModel.DoesNotExist:
             raise ValueError("Заявка на дружбу не найдена или уже отменена")
 
+    def is_friends(self, user_a, user_b) -> bool:
+        """Проверяет, друзья ли два пользователя."""
+        return FriendShipModel.objects.filter(Q(user1=user_a, user2=user_b) | Q(user1=user_b, user2=user_a)).exists()
 
-
-    # Отклоняем заявку
-
-    def remove_friend(self, user1, user2): ...
-
-    # Удаляем Friendship
+    def get_friends(self, user):
+        """Возвращает всех друзей пользователя."""
+        friendships = FriendShipModel.objects.filter(Q(user1=user) | Q(user2=user))
+        friends = []
+        for friendship in friendships:
+            if friendship.user1 == user:
+                friends.append(friendship.user2)
+            else:
+                friends.append(friendship.user1)
+        return friends
 
 
 class BlockService:

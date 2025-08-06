@@ -16,9 +16,9 @@
 
                 <!-- кнопка friends -->
                 {% if is_friends %}
-                    <form method="post" action="#">
+                    <form method="post" action="{% url 'friends:remove_friend' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="#" value="#">
+                        <input type="hidden" name="target_user_id" value="{{ target_user.id }}">
                         <button type="submit" class="btn btn-danger w-100 mt-1">
                             Видалити з друзів
                         </button>
@@ -31,22 +31,29 @@
                             Відізвати заявку
                         </button>
                     </form>
+
                 {% elif request_received %}
                     <form method="post" action="{% url 'friends:accept_friend' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
-                        <button type="submit" class="btn btn-success w-100 mt-1">
-                            Підтвердити дружбу
-                        </button>
-                    </form>
+                            {% csrf_token %}
+                            <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
+                            <button type="submit" class="btn btn-success w-100 mt-1">
+                                Підтвердити дружбу
+                            </button>
+                        </form>
+                    {% if request_received.status == "pending" %}
 
-                    <form method="post" action="{% url 'friends:decline_friend' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="from_user_id" value="{{ target_user.id }}">
-                        <button type="submit" class="btn btn-warning w-100 mt-1">
-                            Відхилити запит
-                        </button>
-                    </form>
+                        <form method="post" action="{% url 'friends:decline_friend' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_user_id" value="{{ target_user.id }}">
+                            <button type="submit" class="btn btn-warning w-100 mt-1">
+                                Відхилити запит
+                            </button>
+                        </form>
+                    {% elif request_received.status == "declined" %}
+                        <!-- Кнопки не показываем, или кнопку отклонения дизейблим -->
+                        <button class="btn btn-secondary w-100 mt-1" disabled>Запит відхилено</button>
+                    {% endif %}
+
                 {% else %}
                     <form method="post" action="{% url 'friends:send_friend' %}">
                         {% csrf_token %}
@@ -136,7 +143,10 @@
                     object_user - {{ target_user }} <br>
                     is_friends - {{ is_friends }} <br>
                     request_sent - {{ request_sent }} <br>
-                    request_received - {{ request_received }} <br>
+                    request_received - {{ request_received.status }} <br>
+                    request_sent - {{ request_sent.status }}<br>
+
+
                 </p>
 
 

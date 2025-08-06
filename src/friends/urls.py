@@ -9,6 +9,7 @@ urlpatterns = [
     path("friend/retract/", views.RetractFriendRequestView.as_view(), name="retract_friend"),
     path("friend/accept/", views.AcceptFriendRequestView.as_view(), name="accept_friend"),
     path("friend/decline/", views.DeclineFriendRequestView.as_view(), name="decline_friend"),
+    path("friend/remove/", views.RemoveFriendRequestView.as_view(), name="remove_friend"),
     #
     path("friends/detail/", views.FriendsDetailView.as_view(), name="friends_detail"),
 ]

@@ -12,6 +12,25 @@ from .services import FriendService
 User = get_user_model()
 
 
+# Remove request
+class RemoveFriendRequestView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        target_user_id = request.POST.get("target_user_id")
+
+        if not target_user_id or not target_user_id.isdigit():
+            return JsonResponse({"error": "Invalid target_user_id"}, status=400)
+
+        target_user = get_object_or_404(User, id=int(target_user_id))
+        current_user = request.user
+
+        service = FriendService()
+        try:
+            service.remove_friend(user_a=current_user, user_b=target_user)
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
 # Chenge status request
 class DeclineFriendRequestView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
@@ -93,10 +112,6 @@ class AcceptFriendRequestView(LoginRequiredMixin, View):
             return JsonResponse({"error": str(e)}, status=400)
 
         return redirect(request.META.get("HTTP_REFERER", "/"))
-
-
-# Remove request
-class RemoveFriendView(LoginRequiredMixin, View): ...
 
 
 class FriendsDetailView(View):
