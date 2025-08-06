@@ -15,6 +15,7 @@ pillow = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 channels-redis = "*"
 psycopg2-binary = "*"
+faker = "*"
 
 [dev-packages]
 flake8 = "*"

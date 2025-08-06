@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "messaging.apps.MessagingConfig",
     "geo.apps.GeoConfig",
+    "friends.apps.FriendsConfig",
+    "datagen.apps.DatagenConfig",
 ]
 
 MIDDLEWARE = [

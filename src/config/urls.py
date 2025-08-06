@@ -9,10 +9,11 @@ urlpatterns = [
     path("", include("accounts.urls", namespace="accounts")),
     path("", include("messaging.urls", namespace="messaging")),
     path("", include("geo.urls", namespace="geo")),
+    path("", include("friends.urls", namespace="friends")),
 ]
 
 # DEBUG TOOLBAR
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]

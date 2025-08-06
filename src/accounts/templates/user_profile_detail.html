@@ -7,44 +7,90 @@
             <!-- Левая колонка: аватар + кнопка -->
             <div class="col-md-3 text-center">
                 {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-fluid rounded mb-3"
-                         style="max-height: 200px;">
+                    <img src="{{ profile.avatar.url }}" alt="Avatar"
+                         class="img-fluid rounded w-100 mb-3">
                 {% else %}
-                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar" class="img-fluid rounded mb-3"
-                         style="max-height: 200px;">
+                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar"
+                         class="img-fluid rounded w-100 mb-3">
                 {% endif %}
 
-                <!-- кнопка add friend -->
-                <a href="#" class="btn btn-secondary w-100 mt-1">
-                    Змінити фото профіля
-                </a>
+                <!-- кнопка friends -->
+                {% if is_friends %}
+                    <form method="post" action="{% url 'friends:remove_friend' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="target_user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-danger w-100 mt-1">
+                            Видалити з друзів
+                        </button>
+                    </form>
+                {% elif request_sent %}
+                    <form method="post" action="{% url 'friends:retract_friend' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Відізвати заявку
+                        </button>
+                    </form>
 
-                <a href="#" class="btn btn-secondary w-100 mt-1">
-                    Добавить в друзья
-                </a>
+                {% elif request_received %}
+                    <form method="post" action="{% url 'friends:accept_friend' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
+                            <button type="submit" class="btn btn-success w-100 mt-1">
+                                Підтвердити дружбу
+                            </button>
+                        </form>
+                    {% if request_received.status == "pending" %}
 
-                {% if profile_user.username %}
-                    <a href="{% url 'messaging:dialog' profile_user.username %}" class="btn btn-primary w-100 mt-1">Chat
-                        со
-                        мной</a>
+                        <form method="post" action="{% url 'friends:decline_friend' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_user_id" value="{{ target_user.id }}">
+                            <button type="submit" class="btn btn-warning w-100 mt-1">
+                                Відхилити запит
+                            </button>
+                        </form>
+                    {% elif request_received.status == "declined" %}
+                        <!-- Кнопки не показываем, или кнопку отклонения дизейблим -->
+                        <button class="btn btn-secondary w-100 mt-1" disabled>Запит відхилено</button>
+                    {% endif %}
+
+                {% else %}
+                    <form method="post" action="{% url 'friends:send_friend' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Додати до друзів
+                        </button>
+                    </form>
+                {% endif %}
+
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'messaging:dialog' target_user.username %}" class="btn btn-primary w-100 mt-1">
+                        Chat со мной
+                    </a>
                 {% else %}
                     <button class="btn btn-secondary w-100 mt-1" disabled>Нет username для чата</button>
                 {% endif %}
 
-                <a href="{% url "accounts:user-profile-edit" profile_user.username %}"
+                <a href="{% url "accounts:user-profile-edit" user.username %}"
                    class="btn btn-secondary w-100 mt-1">
-                    Редактировать страницу
+                    Редактировать страницу (test)
                 </a>
 
                 <a href="#" class="btn btn-secondary w-100 mt-1">
                     Додати до обраного
                 </a>
 
+                <a href="#" class="btn btn-danger w-100 mt-1">
+                    Заблокувати користувача
+                </a>
+
             </div>
 
             <!-- Правая колонка: информация -->
             <div class="col-md-9">
-                <h2>@{{ profile_user.username }}</h2>
+                <h2>@{{ target_user.username }}</h2>
                 <hr>
                 <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}
                     {{ profile.last_name|default:"" }}</p>
@@ -92,6 +138,16 @@
                 <p><strong>О себе:</strong> {{ profile.bio|default:"Пусто" }}</p>
 
                 <hr>
+
+                <p>
+                    object_user - {{ target_user }} <br>
+                    is_friends - {{ is_friends }} <br>
+                    request_sent - {{ request_sent }} <br>
+                    request_received - {{ request_received.status }} <br>
+                    request_sent - {{ request_sent.status }}<br>
+
+
+                </p>
 
 
             </div>
