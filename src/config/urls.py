@@ -11,6 +11,7 @@ urlpatterns = [
     path("", include("geo.urls", namespace="geo")),
     path("", include("friends.urls", namespace="friends")),
     path("", include("favorites.urls", namespace="favorites")),
+    path("media/", include("mediafiles.urls", namespace="media")),
 ]
 
 # DEBUG TOOLBAR

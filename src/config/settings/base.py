@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "friends.apps.FriendsConfig",
     "datagen.apps.DatagenConfig",
     "favorites.apps.FavoritesConfig",
+    "mediafiles.apps.MediafilesConfig",
 ]
 
 MIDDLEWARE = [
