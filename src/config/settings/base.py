@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "geo.apps.GeoConfig",
     "friends.apps.FriendsConfig",
     "datagen.apps.DatagenConfig",
+    "favorites.apps.FavoritesConfig",
 ]
 
 MIDDLEWARE = [
