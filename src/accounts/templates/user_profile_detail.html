@@ -78,9 +78,21 @@
                     Редактировать страницу (test)
                 </a>
 
-                <a href="#" class="btn btn-secondary w-100 mt-1">
-                    Додати до обраного
-                </a>
+                {% if not is_favorite %}
+
+                    <form method="post" action="{% url 'favorites:add_favorite_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Додати до обраного
+                        </button>
+                    </form>
+
+                {% elif is_favorite %}
+                    <a href="#" class="btn btn-secondary w-100 mt-1">
+                        Видалити з обраного
+                    </a>
+                {% endif %}
 
                 <!-- lock button -->
                 {% if not blocked_by_current_user %}
@@ -164,6 +176,8 @@
                     <hr>
                     blocked_by_current_user - {{ blocked_by_current_user }}<br>
                     blocked_by_object_user - {{ blocked_by_object_user }}<br>
+                    <hr>
+                    is_favorites (page) - {{ is_favorite }}
 
 
                 </p>

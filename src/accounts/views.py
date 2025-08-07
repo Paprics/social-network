@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.query_utils import Q
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,6 +16,7 @@ from django.views.generic.edit import CreateView, DeleteView, FormView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
+from favorites.models import FavoriteModel
 from friends.models import (BlockedUserModel, FriendRequestModel,
                             FriendShipModel)
 from geo.models import City, Country, Region, Subregion
@@ -172,12 +174,19 @@ class UserProfileView(DetailView):
         # Получена заявка от object_user?
         request_received = FriendRequestModel.objects.filter(from_user=target_user, to_user=current_user).first()
 
-        print(request_sent, request_received)
-
-        # Заблокирован ли ?
+        # Block ?
         blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
-
         blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+
+        #Favorite (page)
+        content_type = ContentType.objects.get_for_model(User)
+        is_favorite = FavoriteModel.objects.filter(
+            user=current_user,
+            content_type=content_type,
+            object_id=target_user.id
+        ).exists()
+
+        print('is_favorites', is_favorite)
 
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent
@@ -185,6 +194,8 @@ class UserProfileView(DetailView):
 
         context["blocked_by_current_user"] = blocked_by_current_user
         context["blocked_by_object_user"] = blocked_by_object_user
+
+        context["is_favorite"] = is_favorite
 
         return context
 
