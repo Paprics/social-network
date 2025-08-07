@@ -15,7 +15,8 @@ from django.views.generic.edit import CreateView, DeleteView, FormView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
-from friends.models import BlockModel, FriendRequestModel, FriendShipModel
+from friends.models import (BlockedUserModel, FriendRequestModel,
+                            FriendShipModel)
 from geo.models import City, Country, Region, Subregion
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
@@ -157,7 +158,7 @@ class UserProfileView(DetailView):
             context["request_sent"] = False
             context["request_received"] = False
             context["blocked_by_current_user"] = False
-            context["blocked_by_profile_user"] = False
+            context["blocked_by_object_user"] = False
             return context
 
         # --- Статусы  ---
@@ -174,9 +175,9 @@ class UserProfileView(DetailView):
         print(request_sent, request_received)
 
         # Заблокирован ли ?
-        blocked_by_current_user = BlockModel.objects.filter(blocker=current_user, blocked=target_user).exists()
+        blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
 
-        blocked_by_object_user = BlockModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+        blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
 
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent
@@ -191,8 +192,16 @@ class UserProfileView(DetailView):
         current_user = self.request.user
         target_user = self.get_object()  # TODO Dublicate
 
+        # Если просматривает сам себя
         if current_user.id == target_user.id:
             return ["user_own_profile_detail.html"]
+
+        # Если target_user заблокировал current_user — отдаем шаблон блокировки
+        if current_user.is_authenticated:
+            is_blocked = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+            if is_blocked:
+                return ["user_profile_blocked.html"]
+
         return ["user_profile_detail.html"]
 
 

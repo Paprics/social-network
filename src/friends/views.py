@@ -2,11 +2,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models.query_utils import Q
-from django.http.response import JsonResponse
+from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.base import View
 
-from .models import FriendRequestModel, FriendShipModel
+from .models import BlockedUserModel, FriendRequestModel, FriendShipModel
 from .services import FriendService
 
 User = get_user_model()
@@ -146,3 +146,32 @@ class FriendsDetailView(View):
             "suggestions": suggestions,
         }
         return render(request, self.template_name, context)
+
+
+class BlockUserView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        target_user_id = request.POST.get("user_id")
+        if not target_user_id:
+            return HttpResponseBadRequest("User ID not provided")
+
+        target_user = get_object_or_404(User, pk=target_user_id)
+
+        if target_user.id == request.user.id:
+            return HttpResponseBadRequest("You cannot block yourself")
+
+        BlockedUserModel.objects.get_or_create(blocker=request.user, blocked=target_user)
+
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+class UnblockUserView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        target_user_id = request.POST.get("user_id")
+        if not target_user_id:
+            return HttpResponseBadRequest("User ID not provided")
+
+        target_user = get_object_or_404(User, pk=target_user_id)
+
+        BlockedUserModel.objects.filter(blocker=request.user, blocked=target_user).delete()
+
+        return redirect(request.META.get("HTTP_REFERER", "/"))

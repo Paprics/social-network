@@ -42,7 +42,7 @@ class FriendShipModel(models.Model):
         super().save(*args, **kwargs)
 
 
-class BlockModel(models.Model):
+class BlockedUserModel(models.Model):
     blocker = models.ForeignKey(User, related_name="blocking", on_delete=models.CASCADE)
     blocked = models.ForeignKey(User, related_name="blocked_by", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,3 +53,7 @@ class BlockModel(models.Model):
 
     def __str__(self):
         return f"{self.blocker} 🚫 {self.blocked}"
+
+    @classmethod
+    def is_blocked(cls, blocker: User, blocked: User) -> bool:
+        return cls.objects.filter(blocker=blocker, blocked=blocked).exists()
