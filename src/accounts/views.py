@@ -178,15 +178,13 @@ class UserProfileView(DetailView):
         blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
         blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
 
-        #Favorite (page)
+        # Favorite (page)
         content_type = ContentType.objects.get_for_model(User)
         is_favorite = FavoriteModel.objects.filter(
-            user=current_user,
-            content_type=content_type,
-            object_id=target_user.id
+            user=current_user, content_type=content_type, object_id=target_user.id
         ).exists()
 
-        print('is_favorites', is_favorite)
+        print("is_favorites", is_favorite)
 
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent

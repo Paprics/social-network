@@ -78,8 +78,8 @@
                     Редактировать страницу (test)
                 </a>
 
+                <!-- Add/Remove Favorites -->
                 {% if not is_favorite %}
-
                     <form method="post" action="{% url 'favorites:add_favorite_user' %}">
                         {% csrf_token %}
                         <input type="hidden" name="user_id" value="{{ target_user.id }}">
@@ -87,11 +87,14 @@
                             Додати до обраного
                         </button>
                     </form>
-
                 {% elif is_favorite %}
-                    <a href="#" class="btn btn-secondary w-100 mt-1">
-                        Видалити з обраного
-                    </a>
+                    <form method="post" action="{% url 'favorites:remove_favorite_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Видалити з обраного
+                        </button>
+                    </form>
                 {% endif %}
 
                 <!-- lock button -->

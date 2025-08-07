@@ -3,6 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+
 class FavoriteModel(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -11,5 +12,4 @@ class FavoriteModel(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     class Meta:
-        db_table = 'favorites'
-
+        db_table = "favorites"

@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
+
 from favorites.models import FavoriteModel
 
 User = get_user_model()
+
 
 class AddFavoriteUserView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
@@ -20,22 +22,14 @@ class AddFavoriteUserView(LoginRequiredMixin, View):
         content_type = ContentType.objects.get_for_model(User)  # модель, а не экземпляр
 
         exists = FavoriteModel.objects.filter(
-            user=current_user,
-            content_type=content_type,
-            object_id=target_user.id
+            user=current_user, content_type=content_type, object_id=target_user.id
         ).exists()
 
         if exists:
             return JsonResponse({"error": "Already in favorites"}, status=400)
 
-        FavoriteModel.objects.create(
-            user=current_user,
-            content_type=content_type,
-            object_id=target_user.id
-        )
-        return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
+        FavoriteModel.objects.create(user=current_user, content_type=content_type, object_id=target_user.id)
+        return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 class RemoveFavoriteUserView(LoginRequiredMixin, View):
@@ -50,15 +44,11 @@ class RemoveFavoriteUserView(LoginRequiredMixin, View):
         content_type = ContentType.objects.get_for_model(target_user)
 
         favorite = FavoriteModel.objects.filter(
-            user=current_user,
-            content_type=content_type,
-            object_id=target_user.id
+            user=current_user, content_type=content_type, object_id=target_user.id
         ).first()
 
         if not favorite:
             return JsonResponse({"error": "Not found in favorites"}, status=404)
 
         favorite.delete()
-        return JsonResponse({"success": "Removed from favorites"})
-
-
+        return redirect(request.META.get("HTTP_REFERER", "/"))

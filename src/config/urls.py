@@ -10,7 +10,7 @@ urlpatterns = [
     path("", include("messaging.urls", namespace="messaging")),
     path("", include("geo.urls", namespace="geo")),
     path("", include("friends.urls", namespace="friends")),
-    path("", include('favorites.urls', namespace="favorites")),
+    path("", include("favorites.urls", namespace="favorites")),
 ]
 
 # DEBUG TOOLBAR

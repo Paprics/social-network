@@ -12,13 +12,7 @@ def generate_uuid():
 class ChatGroup(models.Model):
     group_name = models.CharField(max_length=128, unique=True, default=generate_uuid)
     title = models.CharField(max_length=128)
-    admin = models.ForeignKey(
-        USER,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="admin_of_groups"
-    )
+    admin = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True, blank=True, related_name="admin_of_groups")
     members = models.ManyToManyField(USER, related_name="chat_groups", blank=True)
     users_online = models.ManyToManyField(USER, blank=True, related_name="online_groups")
     is_private = models.BooleanField(default=False)
