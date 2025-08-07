@@ -34,12 +34,12 @@
 
                 {% elif request_received %}
                     <form method="post" action="{% url 'friends:accept_friend' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
-                            <button type="submit" class="btn btn-success w-100 mt-1">
-                                Підтвердити дружбу
-                            </button>
-                        </form>
+                        {% csrf_token %}
+                        <input type="hidden" name="to_user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-success w-100 mt-1">
+                            Підтвердити дружбу
+                        </button>
+                    </form>
                     {% if request_received.status == "pending" %}
 
                         <form method="post" action="{% url 'friends:decline_friend' %}">
@@ -78,13 +78,43 @@
                     Редактировать страницу (test)
                 </a>
 
-                <a href="#" class="btn btn-secondary w-100 mt-1">
-                    Додати до обраного
-                </a>
+                <!-- Add/Remove Favorites -->
+                {% if not is_favorite %}
+                    <form method="post" action="{% url 'favorites:add_favorite_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Додати до обраного
+                        </button>
+                    </form>
+                {% elif is_favorite %}
+                    <form method="post" action="{% url 'favorites:remove_favorite_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-secondary w-100 mt-1">
+                            Видалити з обраного
+                        </button>
+                    </form>
+                {% endif %}
 
-                <a href="#" class="btn btn-danger w-100 mt-1">
-                    Заблокувати користувача
-                </a>
+                <!-- lock button -->
+                {% if not blocked_by_current_user %}
+                    <form method="post" action="{% url 'friends:block_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-danger w-100 mt-1">
+                            Заблокувати користувача
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'friends:unblock_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-dark w-100 mt-1">
+                            Розблокувати користувача
+                        </button>
+                    </form>
+                {% endif %}
 
             </div>
 
@@ -141,10 +171,16 @@
 
                 <p>
                     object_user - {{ target_user }} <br>
+                    <hr>
                     is_friends - {{ is_friends }} <br>
                     request_sent - {{ request_sent }} <br>
                     request_received - {{ request_received.status }} <br>
-                    request_sent - {{ request_sent.status }}<br>
+                    request_sent status - {{ request_sent.status }}<br>
+                    <hr>
+                    blocked_by_current_user - {{ blocked_by_current_user }}<br>
+                    blocked_by_object_user - {{ blocked_by_object_user }}<br>
+                    <hr>
+                    is_favorites (page) - {{ is_favorite }}
 
 
                 </p>

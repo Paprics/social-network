@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Левая колонка: аватар + кнопка -->
+            <div class="col-md-3 text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar"
+                         class="img-fluid rounded w-100 mb-3">
+                {% else %}
+                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar"
+                         class="img-fluid rounded w-100 mb-3">
+                {% endif %}
+
+
+                <!-- lock button -->
+                {% if not blocked_by_current_user %}
+                    <form method="post" action="{% url 'friends:block_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-danger w-100 mt-1">
+                            Заблокувати користувача
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'friends:unblock_user' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        <button type="submit" class="btn btn-dark w-100 mt-1">
+                            Розблокувати користувача
+                        </button>
+                    </form>
+                {% endif %}
+
+            </div>
+
+            <!-- Правая колонка: информация -->
+            <div class="col-md-9">
+                <h2>@{{ target_user.username }}</h2>
+                <hr>
+                <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}
+                    {{ profile.last_name|default:"" }}</p>
+
+                <hr>
+                <div class="container mt-5">
+                    <div class="alert alert-danger text-center">
+                        <h4 class="mb-3">Користувач обмежив доступ до свого профілю</h4>
+                        <p>Можливо, ви були заблоковані або профіль приховано.</p>
+                    </div>
+                </div>
+
+                <p>
+                <hr class="border border-danger border-2 opacity-100">
+                <h2>Debug Info</h2>
+                <hr>
+
+                object_user - {{ target_user }} <br>
+                <hr>
+                is_friends - {{ is_friends }} <br>
+                request_sent - {{ request_sent }} <br>
+                request_received - {{ request_received.status }} <br>
+                request_sent status - {{ request_sent.status }}<br>
+                <hr>
+                blocked_by_current_user - {{ blocked_by_current_user }}<br>
+                blocked_by_object_user - {{ blocked_by_object_user }}<br>
+
+
+                </p>
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

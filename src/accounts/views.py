@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LogoutView, PasswordResetCompleteView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.query_utils import Q
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +16,9 @@ from django.views.generic.edit import CreateView, DeleteView, FormView
 from django.views.generic.list import ListView
 
 from accounts.utils.utils import TokenGenerator, send_registration_email
-from friends.models import BlockModel, FriendRequestModel, FriendShipModel
+from favorites.models import FavoriteModel
+from friends.models import (BlockedUserModel, FriendRequestModel,
+                            FriendShipModel)
 from geo.models import City, Country, Region, Subregion
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
@@ -157,7 +160,7 @@ class UserProfileView(DetailView):
             context["request_sent"] = False
             context["request_received"] = False
             context["blocked_by_current_user"] = False
-            context["blocked_by_profile_user"] = False
+            context["blocked_by_object_user"] = False
             return context
 
         # --- Статусы  ---
@@ -171,12 +174,15 @@ class UserProfileView(DetailView):
         # Получена заявка от object_user?
         request_received = FriendRequestModel.objects.filter(from_user=target_user, to_user=current_user).first()
 
-        print(request_sent, request_received)
+        # Block ?
+        blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
+        blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
 
-        # Заблокирован ли ?
-        blocked_by_current_user = BlockModel.objects.filter(blocker=current_user, blocked=target_user).exists()
-
-        blocked_by_object_user = BlockModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+        # Favorite (page)
+        content_type = ContentType.objects.get_for_model(User)
+        is_favorite = FavoriteModel.objects.filter(
+            user=current_user, content_type=content_type, object_id=target_user.id
+        ).exists()
 
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent
@@ -185,14 +191,24 @@ class UserProfileView(DetailView):
         context["blocked_by_current_user"] = blocked_by_current_user
         context["blocked_by_object_user"] = blocked_by_object_user
 
+        context["is_favorite"] = is_favorite
+
         return context
 
     def get_template_names(self):
         current_user = self.request.user
         target_user = self.get_object()  # TODO Dublicate
 
+        # Если просматривает сам себя
         if current_user.id == target_user.id:
             return ["user_own_profile_detail.html"]
+
+        # Если target_user заблокировал current_user — отдаем шаблон блокировки
+        if current_user.is_authenticated:
+            is_blocked = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+            if is_blocked:
+                return ["user_profile_blocked.html"]
+
         return ["user_profile_detail.html"]
 
 

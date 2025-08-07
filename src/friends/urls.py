@@ -11,5 +11,8 @@ urlpatterns = [
     path("friend/decline/", views.DeclineFriendRequestView.as_view(), name="decline_friend"),
     path("friend/remove/", views.RemoveFriendRequestView.as_view(), name="remove_friend"),
     #
+    path("block/", views.BlockUserView.as_view(), name="block_user"),
+    path("unblock/", views.UnblockUserView.as_view(), name="unblock_user"),
+    #
     path("friends/detail/", views.FriendsDetailView.as_view(), name="friends_detail"),
 ]
