@@ -1,9 +1,12 @@
+from collections import defaultdict
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
+from django.views.generic.base import TemplateView
 
 from favorites.models import FavoriteModel
 
@@ -52,3 +55,28 @@ class RemoveFavoriteUserView(LoginRequiredMixin, View):
 
         favorite.delete()
         return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+class FavoriteListView(TemplateView):
+    template_name = "list_favorite.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        grouped = defaultdict(list)
+
+        favorites = user.favorites.all().select_related("content_type")
+
+        for fav in favorites:
+            model = fav.content_type.model_class()
+            obj = fav.content_object
+            grouped[model].append(obj)
+
+        # Трансформируем в список словарей с нужными названиями
+        context["grouped_favorites"] = [
+            {"model_name": model.__name__, "verbose_name": model._meta.verbose_name_plural.title(), "objects": objs}
+            for model, objs in grouped.items()
+        ]
+
+        return context

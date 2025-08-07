@@ -1,5 +1,40 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block main %}
-    <h2>Fav page</h2>
+    <div class="container py-4">
+        <h2 class="mb-4">Bookmarks</h2>
+
+        {% if grouped_favorites %}
+            {% for group in grouped_favorites %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        {{ group.verbose_name }}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for obj in group.objects %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {% if group.model_name == 'User' %}
+                                    <a href="{% url 'profile' obj.username %}">{{ obj.username }}</a>
+                                {% elif group.model_name == 'Photo' %}
+                                    <a href="{% url 'photo_detail' obj.pk %}">{{ obj.title }}</a>
+                                {% else %}
+                                    {{ obj }}
+                                {% endif %}
+                                <form method="post" action="#" class="mb-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ obj.pk }}">
+                                    <input type="hidden" name="content_type" value="{{ group.model_name|lower }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">You don’t have any bookmarks yet.</div>
+        {% endif %}
+    </div>
+
+
 {% endblock %}

@@ -184,8 +184,6 @@ class UserProfileView(DetailView):
             user=current_user, content_type=content_type, object_id=target_user.id
         ).exists()
 
-        print("is_favorites", is_favorite)
-
         context["is_friends"] = is_friends
         context["request_sent"] = request_sent
         context["request_received"] = request_received
