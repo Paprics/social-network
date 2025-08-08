@@ -1,3 +1,4 @@
+import shortuuid
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
@@ -7,7 +8,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
-import shortuuid
 
 from geo.models import City
 
@@ -42,13 +42,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
         },
     )
     email = models.EmailField(_("email address"), blank=False, unique=True)
-    uuid = models.CharField(
-        max_length=22,
-        unique=True,
-        default=generate_uuid,
-        editable=False,
-        db_index=True
-    )
+    uuid = models.CharField(max_length=22, unique=True, default=generate_uuid, editable=False, db_index=True)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,

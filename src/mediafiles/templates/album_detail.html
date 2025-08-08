@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block main %}
+    <h2>Album: {{ album_slug }} by {{ target_user }}</h2>
+
+    <div class="row row-cols-1 row-cols-md-4 g-3">
+        {% for photo in photos %}
+            <div class="col">
+                <img src="{{ photo.image.url }}" class="img-fluid rounded"
+                     alt="{{ photo.description|default:'Photo' }}">
+            </div>
+            {% empty %}
+            <p>No photos found in this album.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock %}

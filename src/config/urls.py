@@ -1,8 +1,8 @@
 # config/urls.py
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -12,7 +12,7 @@ urlpatterns = [
     path("", include("geo.urls", namespace="geo")),
     path("", include("friends.urls", namespace="friends")),
     path("", include("favorites.urls", namespace="favorites")),
-    path("media/", include("mediafiles.urls", namespace="media")),
+    path("files/", include("mediafiles.urls", namespace="media")),
 ]
 
 # DEBUG TOOLBAR

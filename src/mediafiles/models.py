@@ -3,24 +3,26 @@ from django.db import models
 from django.utils.text import slugify
 
 from mediafiles.utils import user_avatar_upload_path
-from .validators import validate_file_size, validate_file_extension
+
+from .validators import validate_file_extension, validate_file_size
+
 
 class AlbumModel(models.Model):
     PRIVACY_CHOICES = [
-        ('hidden', 'Hidden (inactive)'),
-        ('private', 'Private (owner only)'),
-        ('friends', 'Friends only'),
-        ('public', 'Public (everyone)'),
+        ("hidden", "Hidden (inactive)"),
+        ("private", "Private (owner only)"),
+        ("friends", "Friends only"),
+        ("public", "Public (everyone)"),
     ]
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='albums')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="albums")
     title = models.CharField(blank=False, max_length=255)
     slug = models.SlugField(max_length=255)
     description = models.CharField(blank=True, max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    privacy = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
+    privacy = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default="public")
     is_active = models.BooleanField(default=True)
     allow_comments = models.BooleanField(default=True)
 
@@ -39,28 +41,27 @@ class AlbumModel(models.Model):
         return f"{self.title} by {self.owner.username} ({self.privacy})"
 
     class Meta:
-        db_table = 'albums'
-        ordering = ['-created_at']
-
+        db_table = "albums"
+        ordering = ["-created_at"]
 
 
 class PhotoModel(models.Model):
     CONTEXT_CHOICES = [
-        ('avatar', 'Profile photo'),
-        ('dialog', 'Dialog Image'),
-        ('chat', 'Public Chat'),
-        ('album', 'Album Photo'),
+        ("avatar", "Profile photo"),
+        ("dialog", "Dialog Image"),
+        ("chat", "Public Chat"),
+        ("album", "Album Photo"),
     ]
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='photos')
-    album = models.ForeignKey('AlbumModel', on_delete=models.CASCADE, null=False, blank=False, related_name='photos')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="photos")
+    album = models.ForeignKey("AlbumModel", on_delete=models.CASCADE, null=False, blank=False, related_name="photos")
     image = models.ImageField(
         upload_to=user_avatar_upload_path,
         validators=[validate_file_extension, validate_file_size],
     )
     description = models.CharField(blank=True, max_length=250)
 
-    context = models.CharField(max_length=10, choices=CONTEXT_CHOICES, default='album')
+    context = models.CharField(max_length=10, choices=CONTEXT_CHOICES, default="album")
 
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -70,6 +71,5 @@ class PhotoModel(models.Model):
     def __str__(self):
         return f"Photo {self.id} by {self.owner.username} ({self.context})"
 
-
     class Meta:
-        db_table = 'photos'
+        db_table = "photos"
