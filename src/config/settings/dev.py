@@ -114,3 +114,5 @@ elif os.environ.get("MODE_DATABASE") == "1":
     }
 else:
     raise RuntimeError("MODE_DATABASE is not set correctly (expected 0 or 1)")
+
+

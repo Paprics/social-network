@@ -9,16 +9,16 @@
         <div class="row">
             <!-- Левая колонка: аватар + кнопка -->
             <div class="col-md-3 text-center">
-                {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}" alt="Avatar"
-                         class="img-fluid rounded w-100 mb-3">
+                {% if profile_photo %}
+                    <img src="{{ profile_photo.image.url }}" alt="Avatar" class="img-fluid rounded w-100 mb-3">
                 {% else %}
-                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar"
-                         class="img-fluid rounded w-100 mb-3">
+                    <img src="{% static 'img/no_avatar.png' %}" alt="No avatar" class="img-fluid rounded w-100 mb-3">
+                    dfgdf - {{ profile }}
                 {% endif %}
 
                 <!-- Кнопка, открывающая модалку -->
-                <button type="button" class="btn btn-secondary w-100 mt-1" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                <button type="button" class="btn btn-secondary w-100 mt-1" data-bs-toggle="modal"
+                        data-bs-target="#avatarModal">
                     Змінити аватар
                 </button>
 

@@ -20,6 +20,7 @@ from favorites.models import FavoriteModel
 from friends.models import (BlockedUserModel, FriendRequestModel,
                             FriendShipModel)
 from geo.models import City, Country, Region, Subregion
+from mediafiles.models import PhotoModel
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
 from .models import UserProfileModel
@@ -178,6 +179,11 @@ class UserProfileView(DetailView):
         blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
         blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
 
+        # Select owner for profile photo query (current user if viewing own profile, else target user)
+        owner = current_user if current_user == target_user else target_user
+        profile_photo = PhotoModel.objects.filter(owner=owner, album__slug='profile-photos').order_by(
+            '-uploaded_at').first()
+
         # Favorite (page)
         content_type = ContentType.objects.get_for_model(User)
         is_favorite = FavoriteModel.objects.filter(
@@ -192,6 +198,8 @@ class UserProfileView(DetailView):
         context["blocked_by_object_user"] = blocked_by_object_user
 
         context["is_favorite"] = is_favorite
+
+        context["profile_photo"] = profile_photo
 
         return context
 
