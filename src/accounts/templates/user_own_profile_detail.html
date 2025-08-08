@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block main %}
+
+    {% include "includes/chenge_avatar_modal.html" %}
+
     <div class="container mt-4">
         <div class="row">
             <!-- Левая колонка: аватар + кнопка -->
@@ -14,11 +17,11 @@
                          class="img-fluid rounded w-100 mb-3">
                 {% endif %}
 
-                <!-- кнопка add friend -->
-                <a href="{% url "accounts:user-profile-edit" user.username %}"
-                   class="btn btn-secondary w-100 mt-1">
+                <!-- Кнопка, открывающая модалку -->
+                <button type="button" class="btn btn-secondary w-100 mt-1" data-bs-toggle="modal" data-bs-target="#avatarModal">
                     Змінити аватар
-                </a>
+                </button>
+
 
                 <a href="{% url "accounts:user-profile-edit" user.username %}"
                    class="btn btn-secondary w-100 mt-1">
