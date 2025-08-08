@@ -26,8 +26,13 @@
                     <a class="dropdown-item" href="#">Profile photo</a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="{% url 'mediafiles:album-list' 'Altay' %}">Albums</a>
+                    <a class="dropdown-item" href="{% url 'mediafiles:album-list' user.username %}">Albums</a>
                 </li>
+
+                <li>
+                    <a class="dropdown-item" href="{% url 'mediafiles:album-create' %}">New album</a>
+                </li>
+
             </ul>
         </li>
 

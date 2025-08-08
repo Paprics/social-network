@@ -1,10 +1,36 @@
 from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
+from django.urls.base import reverse_lazy
+from django.utils.text import slugify
 from django.views.generic.base import View
+from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 
 from .models import AlbumModel, PhotoModel
+
+
+class AlbumCreateView(CreateView):
+    model = AlbumModel
+    template_name = "album_create.html"
+    fields = ["title", "description", "privacy", "is_active", "allow_comments"]
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        # Генерируем slug из title, если не задан
+        if not form.instance.slug:
+            form.instance.slug = slugify(form.instance.title)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Переадресация на список альбомов текущего пользователя
+        return reverse_lazy("mediafiles:album-list", kwargs={"target_user": self.request.user.username})
+
+    def form_invalid(self, form):
+        # Для дебага — выведем ошибки в консоль или лог
+        print("Form errors:", form.errors)
+        # Можно и в шаблон передать (если хочешь)
+        return super().form_invalid(form)
 
 
 class AlbumDetailView(ListView):

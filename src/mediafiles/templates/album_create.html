@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div class="container mt-4" style="max-width: 600px;">
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <h2>Create New Album</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                <input type="text" name="title" maxlength="255" class="form-control" id="id_title" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                <textarea name="description" maxlength="250" class="form-control" id="id_description"
+                          rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_privacy" class="form-label">Privacy</label>
+                <select name="privacy" class="form-select" id="id_privacy" required>
+                    <option value="hidden">Hidden (inactive)</option>
+                    <option value="private">Private (owner only)</option>
+                    <option value="friends">Friends only</option>
+                    <option value="public" selected>Public (everyone)</option>
+                </select>
+            </div>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="id_is_active" name="is_active" checked>
+                <label class="form-check-label" for="id_is_active">Is Active</label>
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="id_allow_comments" name="allow_comments" checked>
+                <label class="form-check-label" for="id_allow_comments">Allow Comments</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Create Album</button>
+        </form>
+    </div>
+{% endblock %}
