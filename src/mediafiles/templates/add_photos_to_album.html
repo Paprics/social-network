@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <form method="post" action="{% url 'mediafiles:add-photos' album.slug %}" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="photos" class="form-label">Upload Photos</label>
+            <input class="form-control {% if errors.photos %}is-invalid{% endif %}"
+                   type="file" id="photos" name="photos" multiple>
+            {% if errors.photos %}
+                <div class="invalid-feedback">
+                    {{ errors.photos }}
+                </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+{% endblock %}

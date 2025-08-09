@@ -28,100 +28,6 @@ from .models import UserProfileModel
 User = get_user_model()
 
 
-class UserProfileEditView(LoginRequiredMixin, View):
-    template_name = "user_profile_edit.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        username = kwargs.get("username")
-
-        if username != request.user.username:
-            return HttpResponseForbidden("Nice try, but no.")
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        user = get_object_or_404(User, username=kwargs.get("username"))
-        profile, _ = UserProfileModel.objects.get_or_create(user=user)
-
-        form_user = UserUpdateForm(instance=user)
-        form_profile = UserProfileForm(instance=profile)
-
-        countries = Country.objects.all()
-        regions = (
-            Region.objects.filter(country=profile.city.country) if profile and profile.city else Region.objects.none()
-        )
-        subregions = (
-            Subregion.objects.filter(region=profile.city.region)
-            if profile and profile.city and profile.city.region
-            else Subregion.objects.none()
-        )
-        cities = City.objects.filter(region=profile.city.region) if profile and profile.city else City.objects.none()
-
-        return render(
-            request,
-            self.template_name,
-            {
-                "user": user,
-                "profile": profile,
-                "form_user": form_user,
-                "form_profile": form_profile,
-                "countries": countries,
-                "regions": regions,
-                "subregions": subregions,
-                "cities": cities,
-            },
-        )
-
-    def post(self, request, *args, **kwargs):
-        user = get_object_or_404(User, username=kwargs.get("username"))
-        profile, _ = UserProfileModel.objects.get_or_create(user=user)
-
-        form_user = UserUpdateForm(request.POST, instance=user)
-        form_profile = UserProfileForm(request.POST, request.FILES, instance=profile)
-
-        if form_user.is_valid() and form_profile.is_valid():
-            # Форма валидна — сохраняем и редиректим
-            form_user.save()
-            obj_profile = form_profile.save(commit=False)
-            obj_profile.user = user
-            obj_profile.save()
-            return redirect("accounts:user-profile", username=user.username)
-        else:
-            # Форма не валидна — выводим ошибки и заново показываем форму с данными
-            print(f"form_user errors - {form_user.errors}")
-            print(f"form_profile errors - {form_profile.errors}")
-
-            countries = Country.objects.all()
-            regions = (
-                Region.objects.filter(country=profile.city.country)
-                if profile and profile.city
-                else Region.objects.none()
-            )
-            subregions = (
-                Subregion.objects.filter(region=profile.city.region)
-                if profile and profile.city and profile.city.region
-                else Subregion.objects.none()
-            )
-            cities = (
-                City.objects.filter(region=profile.city.region) if profile and profile.city else City.objects.none()
-            )
-
-            return render(
-                request,
-                self.template_name,
-                {
-                    "user": user,
-                    "profile": profile,
-                    "form_user": form_user,
-                    "form_profile": form_profile,
-                    "countries": countries,
-                    "regions": regions,
-                    "subregions": subregions,
-                    "cities": cities,
-                },
-            )
-
-
 class UserListView(ListView):
     model = User
     context_object_name = "users"
@@ -221,6 +127,100 @@ class UserProfileView(DetailView):
                 return ["user_profile_blocked.html"]
 
         return ["user_profile_detail.html"]
+
+
+class UserProfileEditView(LoginRequiredMixin, View):
+    template_name = "user_profile_edit.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        username = kwargs.get("username")
+
+        if username != request.user.username:
+            return HttpResponseForbidden("Nice try, but no.")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, username=kwargs.get("username"))
+        profile, _ = UserProfileModel.objects.get_or_create(user=user)
+
+        form_user = UserUpdateForm(instance=user)
+        form_profile = UserProfileForm(instance=profile)
+
+        countries = Country.objects.all()
+        regions = (
+            Region.objects.filter(country=profile.city.country) if profile and profile.city else Region.objects.none()
+        )
+        subregions = (
+            Subregion.objects.filter(region=profile.city.region)
+            if profile and profile.city and profile.city.region
+            else Subregion.objects.none()
+        )
+        cities = City.objects.filter(region=profile.city.region) if profile and profile.city else City.objects.none()
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "user": user,
+                "profile": profile,
+                "form_user": form_user,
+                "form_profile": form_profile,
+                "countries": countries,
+                "regions": regions,
+                "subregions": subregions,
+                "cities": cities,
+            },
+        )
+
+    def post(self, request, *args, **kwargs):
+        user = get_object_or_404(User, username=kwargs.get("username"))
+        profile, _ = UserProfileModel.objects.get_or_create(user=user)
+
+        form_user = UserUpdateForm(request.POST, instance=user)
+        form_profile = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if form_user.is_valid() and form_profile.is_valid():
+            # Форма валидна — сохраняем и редиректим
+            form_user.save()
+            obj_profile = form_profile.save(commit=False)
+            obj_profile.user = user
+            obj_profile.save()
+            return redirect("accounts:user-profile", username=user.username)
+        else:
+            # Форма не валидна — выводим ошибки и заново показываем форму с данными
+            print(f"form_user errors - {form_user.errors}")
+            print(f"form_profile errors - {form_profile.errors}")
+
+            countries = Country.objects.all()
+            regions = (
+                Region.objects.filter(country=profile.city.country)
+                if profile and profile.city
+                else Region.objects.none()
+            )
+            subregions = (
+                Subregion.objects.filter(region=profile.city.region)
+                if profile and profile.city and profile.city.region
+                else Subregion.objects.none()
+            )
+            cities = (
+                City.objects.filter(region=profile.city.region) if profile and profile.city else City.objects.none()
+            )
+
+            return render(
+                request,
+                self.template_name,
+                {
+                    "user": user,
+                    "profile": profile,
+                    "form_user": form_user,
+                    "form_profile": form_profile,
+                    "countries": countries,
+                    "regions": regions,
+                    "subregions": subregions,
+                    "cities": cities,
+                },
+            )
 
 
 # RESET PASSWORD

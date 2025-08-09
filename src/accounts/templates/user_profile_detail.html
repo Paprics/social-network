@@ -122,11 +122,11 @@
             <div class="col-md-9">
                 <h2>@{{ target_user.username }}</h2>
                 <hr>
-                <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}
+                <p><strong>Имя:</strong> {{ target_user.first_name|default:"Не указано" }}
                     {{ profile.last_name|default:"" }}</p>
                 <p><strong>Пол:</strong>
-                    {% if profile.gender == "M" %} Мужской
-                    {% elif profile.gender == "F" %} Женский
+                    {% if target_user.gender == "M" %} Мужской
+                    {% elif target_user.gender == "F" %} Женский
                     {% else %} Не указан
                     {% endif %}
                 </p>

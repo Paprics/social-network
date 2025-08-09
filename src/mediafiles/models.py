@@ -37,6 +37,9 @@ class AlbumModel(models.Model):
         super().save(*args, **kwargs)
 
     def can_view(self, user):
+        if self.owner == user:
+            return True  # владелец всегда видит
+
         if not self.is_active:
             return False
 
@@ -46,8 +49,10 @@ class AlbumModel(models.Model):
         if not user.is_authenticated:
             return False
 
-        if self.owner == user:
-            return True
+        if self.privacy == "friends":
+            return hasattr(self.owner, "friends") and user in self.owner.friends.all()
+
+        return False
 
         if self.privacy == "friends":
             return hasattr(self.owner, "friends") and user in self.owner.friends.all()

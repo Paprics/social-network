@@ -2,7 +2,14 @@
 
 {% block main %}
     <div class="container mt-4">
-        <h2 class="mb-4">Albums of {{ view.kwargs.target_user|default:request.user.username }}</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-0">Albums of {{ view.kwargs.target_user|default:request.user.username }}</h2>
+            </div>
+            <a href="{% url 'mediafiles:album-create' %}" class="btn btn-primary btn-sm">➕ Новый альбом</a>
+        </div>
+
+        <hr class="my-4 border-danger" style="border-width: 2px;">
 
         {% if albums %}
             <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -18,11 +25,16 @@
                                     {{ album.created_at|date:"d M Y" }}</small></p>
 
                                 <!-- Первая кнопка — View Album -->
-                                <a href="#" class="btn btn-primary btn-sm mt-auto">View Album</a>
+                                <a href="{% url 'mediafiles:album-detail' target_user=album.owner.username album_slug=album.slug %}"
+                                   class="btn btn-primary btn-sm mt-auto">View Album</a>
                                 <!-- Вторая кнопка — Setting под первой -->
                                 {% if user == album.owner %}
-                                    <a href="#" class="btn btn-secondary btn-sm mt-2">Add photo</a>
-                                    <a href="{% url 'mediafiles:settings-album' user.username album.slug %}" class="btn btn-secondary btn-sm mt-2">Setting</a>
+                                    <a href="{% url 'mediafiles:add-photos' album.slug %}"
+                                       class="btn btn-secondary btn-sm mt-2">
+                                        Add photo
+                                    </a>
+                                    <a href="{% url 'mediafiles:settings-album' user.username album.slug %}"
+                                       class="btn btn-secondary btn-sm mt-2">Setting</a>
                                 {% endif %}
 
                             </div>

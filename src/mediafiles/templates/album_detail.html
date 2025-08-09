@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+
 {% block main %}
-    <h2>Album: {{ album_slug }} by {{ target_user }}</h2>
+    <h2>Album:  {{ album.title }} by: {{ album.owner.username  }}</h2>
 
     <div class="row row-cols-1 row-cols-md-4 g-3">
         {% for photo in photos %}
