@@ -1,28 +1,51 @@
-from django.core.exceptions import ValidationError
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
 from django.urls.base import reverse_lazy
 from django.views.generic.base import View
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from .models import AlbumModel, PhotoModel
 
+
+class DeleteAlbumView(LoginRequiredMixin, DeleteView):
+    model = AlbumModel
+    template_name = "delete_album.html"
+    slug_field = "slug"
+    slug_url_kwarg = "album_slug"
+    context_object_name = "album"
+
+    def get_queryset(self):
+        target_user = self.kwargs.get("target_user")
+        return AlbumModel.objects.filter(owner__username=target_user)
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != request.user:
+            raise PermissionDenied("You don't have permission to delete this album.")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy("mediafiles:album-list", kwargs={"target_user": self.request.user.username})
+
+
 class SettingsAlbumView(UpdateView):
     model = AlbumModel
-    template_name = 'setting_album.html'
-    fields = ['title', 'description', 'privacy', 'is_active', 'allow_comments']
+    template_name = "setting_album.html"
+    fields = ["title", "description", "privacy", "is_active", "allow_comments"]
 
-    slug_field = 'slug'             # поле модели, по которому искать
-    slug_url_kwarg = 'album_slug'  # параметр из URL
+    slug_field = "slug"  # поле модели, по которому искать
+    slug_url_kwarg = "album_slug"  # параметр из URL
+
+    context_object_name = "album"
 
     def get_queryset(self):
         return AlbumModel.objects.filter(owner=self.request.user)
 
     def get_success_url(self):
         return reverse_lazy("mediafiles:album-list", kwargs={"target_user": self.request.user.username})
-
-
 
 
 class AlbumCreateView(CreateView):

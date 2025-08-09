@@ -11,6 +11,6 @@ urlpatterns = [
     path("albums/create/", views.AlbumCreateView.as_view(), name="album-create"),  # ПОСТАВЬ ВЫШЕ!
     path("albums/<slug:target_user>/", views.AlbumListView.as_view(), name="album-list"),
     path("albums/<slug:target_user>/<slug:album_slug>/", views.AlbumDetailView.as_view(), name="album-detail"),
-    path('albums/<str:username>/<slug:album_slug>/settings/', views.SettingsAlbumView.as_view(), name='settings-album')
-
+    path("albums/<str:username>/<slug:album_slug>/settings/", views.SettingsAlbumView.as_view(), name="settings-album"),
+    path("albums/<slug:target_user>/<slug:album_slug>/delete/", views.DeleteAlbumView.as_view(), name="delete-album"),
 ]

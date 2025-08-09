@@ -56,7 +56,8 @@
 
             <button type="submit" class="btn btn-success me-2">Зберегти</button>
             <a href="{% url 'mediafiles:album-list' request.user.username %}" class="btn btn-secondary me-5">Відмінити</a>
-            <a href="" class="btn btn-danger">Видалити альбом</a>
+            <a href="{% url 'mediafiles:delete-album' album.owner.username album.slug %}" class="btn btn-danger">Видалити альбом</a>
+
         </form>
     </div>
 {% endblock %}
