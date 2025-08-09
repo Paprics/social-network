@@ -3,10 +3,26 @@ from django.http.response import JsonResponse
 from django.shortcuts import redirect
 from django.urls.base import reverse_lazy
 from django.views.generic.base import View
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from .models import AlbumModel, PhotoModel
+
+class SettingsAlbumView(UpdateView):
+    model = AlbumModel
+    template_name = 'setting_album.html'
+    fields = ['title', 'description', 'privacy', 'is_active', 'allow_comments']
+
+    slug_field = 'slug'             # поле модели, по которому искать
+    slug_url_kwarg = 'album_slug'  # параметр из URL
+
+    def get_queryset(self):
+        return AlbumModel.objects.filter(owner=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy("mediafiles:album-list", kwargs={"target_user": self.request.user.username})
+
+
 
 
 class AlbumCreateView(CreateView):

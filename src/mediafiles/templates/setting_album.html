@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div class="container mt-4">
+        <h2 class="mb-4">Редагування альбому</h2>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Заголовок</label>
+                <input type="text" name="title" maxlength="255" required class="form-control" id="id_title"
+                       value="{{ form.title.value|default_if_none:'' }}">
+                {% if form.title.errors %}
+                    <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Опис</label>
+                <textarea name="description" class="form-control" id="id_description"
+                          rows="3">{{ form.description.value|default_if_none:'' }}</textarea>
+                {% if form.description.errors %}
+                    <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_privacy" class="form-label">Приватність</label>
+                <select name="privacy" class="form-select" id="id_privacy" required>
+                    {% for key, val in form.fields.privacy.choices %}
+                        <option value="{{ key }}"
+                                {% if form.privacy.value == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.privacy.errors %}
+                    <div class="text-danger small mt-1">{{ form.privacy.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="id_is_active" name="is_active"
+                       {% if form.is_active.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_is_active">
+                    Активний
+                </label>
+            </div>
+
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="id_allow_comments" name="allow_comments"
+                       {% if form.allow_comments.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_allow_comments">
+                    Дозволити коментарі
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-success me-2">Зберегти</button>
+            <a href="{% url 'mediafiles:album-list' request.user.username %}" class="btn btn-secondary me-5">Відмінити</a>
+            <a href="" class="btn btn-danger">Видалити альбом</a>
+        </form>
+    </div>
+{% endblock %}

@@ -21,7 +21,8 @@
                                 <a href="#" class="btn btn-primary btn-sm mt-auto">View Album</a>
                                 <!-- Вторая кнопка — Setting под первой -->
                                 {% if user == album.owner %}
-                                    <a href="#" class="btn btn-secondary btn-sm mt-2">Setting</a>
+                                    <a href="#" class="btn btn-secondary btn-sm mt-2">Add photo</a>
+                                    <a href="{% url 'mediafiles:settings-album' user.username album.slug %}" class="btn btn-secondary btn-sm mt-2">Setting</a>
                                 {% endif %}
 
                             </div>
