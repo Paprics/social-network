@@ -9,7 +9,6 @@ from .validators import validate_file_extension, validate_file_size
 
 class AlbumModel(models.Model):
     PRIVACY_CHOICES = [
-        ("hidden", "Hidden (inactive)"),
         ("private", "Private (owner only)"),
         ("friends", "Friends only"),
         ("public", "Public (everyone)"),
@@ -36,6 +35,24 @@ class AlbumModel(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+    def can_view(self, user):
+        if not self.is_active:
+            return False
+
+        if self.privacy == "public":
+            return True
+
+        if not user.is_authenticated:
+            return False
+
+        if self.owner == user:
+            return True
+
+        if self.privacy == "friends":
+            return hasattr(self.owner, "friends") and user in self.owner.friends.all()
+
+        return False
 
     def __str__(self):
         return f"{self.title} by {self.owner.username} ({self.privacy})"
@@ -67,6 +84,10 @@ class PhotoModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_active = models.BooleanField(default=True)
+
+    def can_view(self, user):
+        # Проксируем проверку доступа через альбом
+        return self.album.can_view(user)
 
     def __str__(self):
         return f"Photo {self.id} by {self.owner.username} ({self.context})"

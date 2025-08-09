@@ -1,32 +1,38 @@
 {% extends "base.html" %}
 
 {% block main %}
-<div class="container mt-4">
-    <h2 class="mb-4">Albums of {{ view.kwargs.target_user|default:request.user.username }}</h2>
+    <div class="container mt-4">
+        <h2 class="mb-4">Albums of {{ view.kwargs.target_user|default:request.user.username }}</h2>
 
-    {% if albums %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for album in albums %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ album.title }}</h5>
-                            <p class="card-text text-truncate">{{ album.description|default:"No description" }}</p>
-                            <p class="mb-2"><small class="text-muted">Privacy: {{ album.get_privacy_display }}</small></p>
-                            <p class="mb-2"><small class="text-muted">Created: {{ album.created_at|date:"d M Y" }}</small></p>
+        {% if albums %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for album in albums %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ album.title }}</h5>
+                                <p class="card-text text-truncate">{{ album.description|default:"No description" }}</p>
+                                <p class="mb-2"><small
+                                        class="text-muted">Privacy: {{ album.get_privacy_display }}</small></p>
+                                <p class="mb-2"><small class="text-muted">Created:
+                                    {{ album.created_at|date:"d M Y" }}</small></p>
 
-                            <!-- Заглушка ссылки, ведёт в никуда пока -->
-                            <a href="#" class="btn btn-primary mt-auto">View Album</a>
+                                <!-- Первая кнопка — View Album -->
+                                <a href="#" class="btn btn-primary btn-sm mt-auto">View Album</a>
+                                <!-- Вторая кнопка — Setting под первой -->
+                                {% if user == album.owner %}
+                                    <a href="#" class="btn btn-secondary btn-sm mt-2">Setting</a>
+                                {% endif %}
 
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-warning" role="alert">
-            No albums found.
-        </div>
-    {% endif %}
-</div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                No albums found.
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

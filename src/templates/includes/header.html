@@ -25,14 +25,18 @@
                 <li>
                     <a class="dropdown-item" href="#">Profile photo</a>
                 </li>
+
                 <li>
-                    <a class="dropdown-item" href="{% url 'mediafiles:album-list' user.username %}">Albums</a>
+                    {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'mediafiles:album-list' user.username %}">Albums</a>
+                    {% else %}
+                        <a class="dropdown-item" href="#">Albums</a>
+                    {% endif %}
                 </li>
 
                 <li>
                     <a class="dropdown-item" href="{% url 'mediafiles:album-create' %}">New album</a>
                 </li>
-
             </ul>
         </li>
 

@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
 from django.urls.base import reverse_lazy
-from django.utils.text import slugify
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
@@ -17,9 +16,6 @@ class AlbumCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        # Генерируем slug из title, если не задан
-        if not form.instance.slug:
-            form.instance.slug = slugify(form.instance.title)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -27,9 +23,6 @@ class AlbumCreateView(CreateView):
         return reverse_lazy("mediafiles:album-list", kwargs={"target_user": self.request.user.username})
 
     def form_invalid(self, form):
-        # Для дебага — выведем ошибки в консоль или лог
-        print("Form errors:", form.errors)
-        # Можно и в шаблон передать (если хочешь)
         return super().form_invalid(form)
 
 
@@ -51,15 +44,21 @@ class AlbumListView(ListView):
     template_name = "album_list.html"
     model = AlbumModel
     context_object_name = "albums"
-    # paginate_by = 10
+    # paginate_by = 9
 
     def get_queryset(self):
         target_username = self.kwargs.get("target_user")
+        albums = AlbumModel.objects.filter(owner__username=target_username, is_active=True)
+
         if target_username == self.request.user.username:
             return AlbumModel.objects.filter(owner__username=target_username)
-        else:
-            # логику фильтрации для чужого пользователя
-            return AlbumModel.objects.filter(owner__username=target_username, is_active=True)
+
+        allowed_albums = []
+        for album in albums:
+            if album.can_view(self.request.user):
+                allowed_albums.append(album)
+
+        return allowed_albums
 
 
 class UploadUserProfilePhotoView(View):
