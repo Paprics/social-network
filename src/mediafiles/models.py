@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
-from mediafiles.utils import user_avatar_upload_path
+from mediafiles.utils import album_photo_upload_path
 
 from .validators import validate_file_extension, validate_file_size
 
@@ -78,7 +78,7 @@ class PhotoModel(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="photos")
     album = models.ForeignKey("AlbumModel", on_delete=models.CASCADE, null=False, blank=False, related_name="photos")
     image = models.ImageField(
-        upload_to=user_avatar_upload_path,
+        upload_to=album_photo_upload_path,
         validators=[validate_file_extension, validate_file_size],
     )
     description = models.CharField(blank=True, max_length=250)

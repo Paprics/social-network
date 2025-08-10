@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <h2>Album:  {{ album.title }} by: {{ album.owner.username  }}</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Album:  {{ album.title }} | by: {{ album.owner.username  }}</h2>
+            </div>
+            <a href="{% url 'mediafiles:add-photos' album.slug %}" class="btn btn-primary btn-sm">➕ Додати фото</a>
+        </div>
+
+        <hr class="my-4 border-danger" style="border-width: 2px;">
 
     <div class="row row-cols-1 row-cols-md-4 g-3">
         {% for photo in photos %}
