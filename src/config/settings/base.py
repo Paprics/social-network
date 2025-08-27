@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #
     "phonenumber_field",
+    "easy_thumbnails",
     #
     "main.apps.MainConfig",
     "accounts.apps.AccountsConfig",

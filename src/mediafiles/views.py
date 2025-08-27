@@ -4,35 +4,48 @@ from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls.base import reverse_lazy
 from django.views.generic.base import View
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from easy_thumbnails.files import get_thumbnailer
 
 from .models import AlbumModel, PhotoModel
 
 
-class AlbumDetailView(ListView):
-    model = PhotoModel
-    template_name = "album_detail.html"
-    context_object_name = "photos"
+class AlbumGalleryView(DetailView):
+    model = AlbumModel
+    # template_name = "gallery.html"
+    template_name = "gall.html"
+    context_object_name = "album"
+    slug_field = "slug"
+    slug_url_kwarg = "album_slug"
 
-    def get_album(self):
-        target_user = self.kwargs.get("target_user")
-        album_slug = self.kwargs.get("album_slug")
-        album = get_object_or_404(AlbumModel, owner__username=target_user, slug=album_slug)
-        return album
-
-    def get_queryset(self):
-        album = self.get_album()
-
-        if not album.can_view(self.request.user):
-            raise PermissionDenied("You do not have permission to view this album.")
-
-        return PhotoModel.objects.filter(album=album, is_active=True).order_by("-uploaded_at")
+    def get_object(self, queryset=None):
+        # ищем альбом по пользователю и слагу
+        return get_object_or_404(
+            AlbumModel.objects.filter(owner__username=self.kwargs["target_user"], is_active=True),
+            slug=self.kwargs["album_slug"]
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["album"] = self.get_album()  # чтобы в шаблоне был доступ к альбому
+        album = self.object
+
+        photos = []
+        qs = PhotoModel.objects.filter(album=album, is_active=True)
+
+        for photo in qs:
+            photos.append({
+                "url": photo.image.url,
+                "width": photo.image.width,
+                "height": photo.image.height,
+                "thumb_url": get_thumbnailer(photo.image).get_thumbnail({'size': (300, 300), 'crop': True}).url,
+                "description": photo.description or ""
+            })
+
+        context["photos"] = photos
         return context
+
 
 
 class AlbumListView(ListView):
@@ -40,18 +53,33 @@ class AlbumListView(ListView):
     model = AlbumModel
     context_object_name = "albums"
 
-    # paginate_by = 9
-
     def get_queryset(self):
         target_username = self.kwargs.get("target_user")
-        albums = AlbumModel.objects.filter(owner__username=target_username, is_active=True)
+        albums_qs = AlbumModel.objects.filter(owner__username=target_username, is_active=True)
 
-        # Если юзер смотрит свои альбомы — возвращаем всё
         if target_username == self.request.user.username:
-            return AlbumModel.objects.filter(owner__username=target_username)
+            albums_qs = AlbumModel.objects.filter(owner__username=target_username)
+        else:
+            albums_qs = [album for album in albums_qs if album.can_view(self.request.user)]
 
-        # Если чужие — фильтруем по can_view на уровне Python
-        return [album for album in albums if album.can_view(self.request.user)]
+        # Если albums_qs уже список (после фильтрации can_view), то делаем так:
+        if isinstance(albums_qs, list):
+            albums = albums_qs
+        else:
+            albums = list(albums_qs)
+
+        # Собираем id последних активных фоток для всех альбомов
+        from mediafiles.models import PhotoModel  # подставь свой путь
+
+        for album in albums:
+            last_photo = PhotoModel.objects.filter(album=album, is_active=True).order_by("-uploaded_at").first()
+            if last_photo and last_photo.image:
+                thumb = get_thumbnailer(last_photo.image).get_thumbnail({"size": (200, 200), "crop": True})
+                album.cover_url = thumb.url
+            else:
+                album.cover_url = ""
+
+        return albums
 
 
 class AlbumCreateView(CreateView):

@@ -13,5 +13,11 @@ urlpatterns = [
     path("albums/<str:username>/<slug:album_slug>/settings/", views.SettingsAlbumView.as_view(), name="settings-album"),
     path("albums/<slug:target_user>/<slug:album_slug>/delete/", views.DeleteAlbumView.as_view(), name="delete-album"),
     path("albums/add-photos/<slug:album_slug>/", views.AddPhotosToAlbumView.as_view(), name="add-photos"),
-    path("albums/<slug:target_user>/<slug:album_slug>/", views.AlbumDetailView.as_view(), name="album-detail"),
+    path(
+        "albums/<slug:target_user>/<slug:album_slug>/",
+        views.AlbumGalleryView.as_view(),
+        name="album-detail"
+    )
+    # path("albums/<slug:target_user>/<slug:album_slug>/", views.AlbumDetailView.as_view(), name="album-detail"),
+    # path("photo-detail/<str:uuid_photo>/", views.PhotoDetailView.as_view(), name="photo-detail"),
 ]

@@ -3,19 +3,21 @@
 {% block main %}
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2>Album:  {{ album.title }} | by: {{ album.owner.username  }}</h2>
-            </div>
-            <a href="{% url 'mediafiles:add-photos' album.slug %}" class="btn btn-primary btn-sm">➕ Додати фото</a>
+        <div>
+            <h2>Album: {{ album.title }} | by: {{ album.owner.username }}</h2>
         </div>
+        <a href="{% url 'mediafiles:add-photos' album.slug %}" class="btn btn-primary btn-sm">➕ Додати фото</a>
+    </div>
 
-        <hr class="my-4 border-danger" style="border-width: 2px;">
+    <hr class="my-4 border-danger" style="border-width: 2px;">
 
     <div class="row row-cols-1 row-cols-md-4 g-3">
         {% for photo in photos %}
             <div class="col">
-                <img src="{{ photo.image.url }}" class="img-fluid rounded"
-                     alt="{{ photo.description|default:'Photo' }}">
+                <a href="{% url 'mediafiles:photo-detail' photo.uuid %}">
+                    <img src="{{ photo.image.url }}" class="img-fluid rounded"
+                         alt="{{ photo.description|default:'Photo' }}">
+                </a>
             </div>
             {% empty %}
             <p>No photos found in this album.</p>

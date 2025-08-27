@@ -1,10 +1,17 @@
+import shortuuid
 from django.conf import settings
 from django.db import models
+from django.urls.base import reverse
 from django.utils.text import slugify
+from easy_thumbnails.files import get_thumbnailer
 
 from mediafiles.utils import album_photo_upload_path
 
 from .validators import validate_file_extension, validate_file_size
+
+
+def generate_uuid():
+    return shortuuid.uuid()
 
 
 class AlbumModel(models.Model):
@@ -36,6 +43,14 @@ class AlbumModel(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+
+    def get_absolute_url(self, request=None):
+        if request:
+            return request.build_absolute_uri(
+                reverse('album-detail', kwargs={'target_user': self.owner.username, 'album_slug': self.slug})
+        )
+        return reverse('album-detail', kwargs={'target_user': self.owner.username, 'album_slug': self.slug})
+
     def can_view(self, user):
         if self.owner == user:
             return True  # владелец всегда видит
@@ -48,11 +63,6 @@ class AlbumModel(models.Model):
 
         if not user.is_authenticated:
             return False
-
-        if self.privacy == "friends":
-            return hasattr(self.owner, "friends") and user in self.owner.friends.all()
-
-        return False
 
         if self.privacy == "friends":
             return hasattr(self.owner, "friends") and user in self.owner.friends.all()
@@ -90,9 +100,28 @@ class PhotoModel(models.Model):
 
     is_active = models.BooleanField(default=True)
 
+    uuid = models.CharField(max_length=22, unique=True, default=generate_uuid, editable=False, db_index=True)
+
     def can_view(self, user):
         # Проксируем проверку доступа через альбом
         return self.album.can_view(user)
+
+    def get_absolute_url(self, request=None):
+        if request:
+            return request.build_absolute_uri(
+                reverse('photo-detail', kwargs={'uuid_photo': self.uuid})
+            )
+        return reverse('photo-detail', kwargs={'uuid_photo': self.uuid})
+
+    def get_image_url(self, request=None):
+        url = self.image.url
+        return request.build_absolute_uri(url) if request else url
+
+    def get_thumbnail_url(self, size=(300, 300), request=None):
+        thumbnailer = get_thumbnailer(self.image)
+        thumb = thumbnailer.get_thumbnail({'size': size, 'crop': True})
+        url = thumb.url
+        return request.build_absolute_uri(url) if request else url
 
     def __str__(self):
         return f"Photo {self.id} by {self.owner.username} ({self.context})"

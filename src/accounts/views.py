@@ -87,11 +87,14 @@ class UserProfileView(DetailView):
 
         # Select owner for profile photo query (current user if viewing own profile, else target user)
         owner = current_user if current_user == target_user else target_user
+
         profile_photo = (
             PhotoModel.objects.filter(owner=owner, album__slug="profile-photos", is_active=True)
             .order_by("-uploaded_at")
             .first()
         )
+
+        # profile_photo_url = owner.userprofilemodel.get_tramp_cover(self.request.user)
 
         # Favorite (page)
         content_type = ContentType.objects.get_for_model(User)
