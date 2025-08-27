@@ -1,0 +1,21 @@
+<!-- Модальное окно Bootstrap -->
+<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'mediafiles:upload_profile_photo' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="avatarModalLabel">Завантажити нове фото</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <input type="file" name="profile_photo" accept="image/*" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <button type="submit" class="btn btn-primary">Зберегти</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

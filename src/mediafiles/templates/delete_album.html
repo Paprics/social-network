@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class="container mt-4">
+    <h2 class="mb-4">Видалення альбому: "{{ album.title }}"</h2>
+    <p>Ви впевнені, що хочете видалити цей альбом? Цю дію неможливо скасувати.</p>
+
+    <!-- Кнопки: Удалить (открывает модалку) и Отмена (возврат) -->
+    <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        Видалити альбом
+    </button>
+    <a href="{% url 'mediafiles:album-list' request.user.username %}" class="btn btn-secondary">
+        Відмінити
+    </a>
+
+    <!-- Модалка подтверждения -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmDeleteLabel">Підтвердження видалення</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5">Цю дію <strong>неможливо скасувати</strong>. Ви впевнені, що хочете видалити альбом <em>{{ album.title }}</em>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відмінити</button>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger fw-bold">Підтвердити видалення</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  var confirmModal = document.getElementById('confirmDeleteModal')
+  confirmModal.addEventListener('shown.bs.modal', function () {
+    confirmModal.querySelector('button.btn-danger').focus()
+  })
+</script>
+{% endblock %}

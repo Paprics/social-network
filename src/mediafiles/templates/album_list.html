@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-0">Albums of {{ view.kwargs.target_user|default:request.user.username }}</h2>
+            </div>
+            <a href="{% url 'mediafiles:album-create' %}" class="btn btn-primary btn-sm">➕ Новый альбом</a>
+        </div>
+
+        <hr class="my-4 border-danger">
+
+        {% if albums %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for album in albums %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {% if album.cover_url %}
+                                <img src="{{ album.cover_url }}" class="card-img-top" alt="{{ album.title }}">
+                            {% else %}
+                                <img src="{% static 'img/no-cover.png' %}" class="card-img-top" alt="No cover">
+                            {% endif %}
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ album.title }}</h5>
+                                <p class="card-text text-truncate">{{ album.description|default:"No description" }}</p>
+                                <p class="mb-2">
+                                    <small class="text-muted">Privacy: {{ album.get_privacy_display }}</small>
+                                </p>
+                                <p class="mb-2">
+                                    <small class="text-muted">Created: {{ album.created_at|date:"d M Y" }}</small>
+                                </p>
+
+                                <a href="{% url 'mediafiles:album-detail' target_user=album.owner.username album_slug=album.slug %}"
+                                   class="btn btn-primary btn-sm mt-auto">View Album</a>
+
+                                {% if user == album.owner %}
+                                    <a href="{% url 'mediafiles:add-photos' album.slug %}"
+                                       class="btn btn-secondary btn-sm mt-2">
+                                        Add photo
+                                    </a>
+                                    <a href="{% url 'mediafiles:settings-album' user.username album.slug %}"
+                                       class="btn btn-secondary btn-sm mt-2">
+                                        Setting
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                No albums found.
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

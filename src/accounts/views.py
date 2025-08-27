@@ -20,11 +20,116 @@ from favorites.models import FavoriteModel
 from friends.models import (BlockedUserModel, FriendRequestModel,
                             FriendShipModel)
 from geo.models import City, Country, Region, Subregion
+from mediafiles.models import PhotoModel
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
 from .models import UserProfileModel
 
 User = get_user_model()
+
+
+class UserListView(ListView):
+    model = User
+    context_object_name = "users"
+    template_name = "list-all-user.html"
+
+
+class UserProfileView(DetailView):
+    model = User
+    slug_field = "username"
+    slug_url_kwarg = "username"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._target_user = None
+
+    def get_object(self, *args, **kwargs):
+        if self._target_user is None:
+            self._target_user = super().get_object(*args, **kwargs)
+        return self._target_user
+
+    def get_queryset(self):
+        return User.objects.select_related(
+            "userprofilemodel__city__region__country"  # цепочка для джойнов, чтоб за 1 запрос подтянуть всё
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        target_user = self.get_object()
+        context["target_user"] = target_user
+
+        current_user = self.request.user
+
+        if not current_user.is_authenticated:
+            # Аноним, статусы по умолчанию
+            context["is_friends"] = False
+            context["request_sent"] = False
+            context["request_received"] = False
+            context["blocked_by_current_user"] = False
+            context["blocked_by_object_user"] = False
+            return context
+
+        # --- Статусы  ---
+        is_friends = FriendShipModel.objects.filter(
+            Q(user1=current_user, user2=target_user) | Q(user1=target_user, user2=current_user)
+        ).exists()
+
+        # Отправлена заявка от current_user к object_user?
+        request_sent = FriendRequestModel.objects.filter(from_user=current_user, to_user=target_user).first()
+
+        # Получена заявка от object_user?
+        request_received = FriendRequestModel.objects.filter(from_user=target_user, to_user=current_user).first()
+
+        # Block ?
+        blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
+        blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+
+        # Select owner for profile photo query (current user if viewing own profile, else target user)
+        owner = current_user if current_user == target_user else target_user
+
+        profile_photo = (
+            PhotoModel.objects.filter(owner=owner, album__slug="profile-photos", is_active=True)
+            .order_by("-uploaded_at")
+            .first()
+        )
+
+        # profile_photo_url = owner.userprofilemodel.get_tramp_cover(self.request.user)
+
+        # Favorite (page)
+        content_type = ContentType.objects.get_for_model(User)
+        is_favorite = FavoriteModel.objects.filter(
+            user=current_user, content_type=content_type, object_id=target_user.id
+        ).exists()
+
+        context["is_friends"] = is_friends
+        context["request_sent"] = request_sent
+        context["request_received"] = request_received
+
+        context["blocked_by_current_user"] = blocked_by_current_user
+        context["blocked_by_object_user"] = blocked_by_object_user
+
+        context["is_favorite"] = is_favorite
+
+        context["profile_photo"] = profile_photo
+
+        return context
+
+    def get_template_names(self):
+        current_user = self.request.user
+        target_user = self.get_object()  # TODO Dublicate
+
+        # Если просматривает сам себя
+        if current_user.id == target_user.id:
+            return ["user_own_profile_detail.html"]
+
+        # Если target_user заблокировал current_user — отдаем шаблон блокировки
+        if current_user.is_authenticated:
+            is_blocked = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
+            if is_blocked:
+                return ["user_profile_blocked.html"]
+
+        return ["user_profile_detail.html"]
 
 
 class UserProfileEditView(LoginRequiredMixin, View):
@@ -119,97 +224,6 @@ class UserProfileEditView(LoginRequiredMixin, View):
                     "cities": cities,
                 },
             )
-
-
-class UserListView(ListView):
-    model = User
-    context_object_name = "users"
-    template_name = "list-all-user.html"
-
-
-class UserProfileView(DetailView):
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._target_user = None
-
-    def get_object(self, *args, **kwargs):
-        if self._target_user is None:
-            self._target_user = super().get_object(*args, **kwargs)
-        return self._target_user
-
-    def get_queryset(self):
-        return User.objects.select_related(
-            "userprofilemodel__city__region__country"  # цепочка для джойнов, чтоб за 1 запрос подтянуть всё
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        target_user = self.get_object()
-        context["target_user"] = target_user
-
-        current_user = self.request.user
-
-        if not current_user.is_authenticated:
-            # Аноним, статусы по умолчанию
-            context["is_friends"] = False
-            context["request_sent"] = False
-            context["request_received"] = False
-            context["blocked_by_current_user"] = False
-            context["blocked_by_object_user"] = False
-            return context
-
-        # --- Статусы  ---
-        is_friends = FriendShipModel.objects.filter(
-            Q(user1=current_user, user2=target_user) | Q(user1=target_user, user2=current_user)
-        ).exists()
-
-        # Отправлена заявка от current_user к object_user?
-        request_sent = FriendRequestModel.objects.filter(from_user=current_user, to_user=target_user).first()
-
-        # Получена заявка от object_user?
-        request_received = FriendRequestModel.objects.filter(from_user=target_user, to_user=current_user).first()
-
-        # Block ?
-        blocked_by_current_user = BlockedUserModel.objects.filter(blocker=current_user, blocked=target_user).exists()
-        blocked_by_object_user = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
-
-        # Favorite (page)
-        content_type = ContentType.objects.get_for_model(User)
-        is_favorite = FavoriteModel.objects.filter(
-            user=current_user, content_type=content_type, object_id=target_user.id
-        ).exists()
-
-        context["is_friends"] = is_friends
-        context["request_sent"] = request_sent
-        context["request_received"] = request_received
-
-        context["blocked_by_current_user"] = blocked_by_current_user
-        context["blocked_by_object_user"] = blocked_by_object_user
-
-        context["is_favorite"] = is_favorite
-
-        return context
-
-    def get_template_names(self):
-        current_user = self.request.user
-        target_user = self.get_object()  # TODO Dublicate
-
-        # Если просматривает сам себя
-        if current_user.id == target_user.id:
-            return ["user_own_profile_detail.html"]
-
-        # Если target_user заблокировал current_user — отдаем шаблон блокировки
-        if current_user.is_authenticated:
-            is_blocked = BlockedUserModel.objects.filter(blocker=target_user, blocked=current_user).exists()
-            if is_blocked:
-                return ["user_profile_blocked.html"]
-
-        return ["user_profile_detail.html"]
 
 
 # RESET PASSWORD

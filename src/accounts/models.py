@@ -1,3 +1,4 @@
+import shortuuid
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
@@ -13,8 +14,11 @@ from geo.models import City
 from .managers import CustomUserManager
 
 
-class CustomUserModel(AbstractBaseUser, PermissionsMixin):
+def generate_uuid():
+    return shortuuid.uuid()
 
+
+class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     phone_number = PhoneNumberField(
         _("phone number"),
         unique=True,
@@ -38,6 +42,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
         },
     )
     email = models.EmailField(_("email address"), blank=False, unique=True)
+    uuid = models.CharField(max_length=22, unique=True, default=generate_uuid, editable=False, db_index=True)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -68,13 +73,13 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        db_table = "users"
 
     def clean(self):
         super().clean()
         self.email = self.__class__.objects.normalize_email(self.email)
 
     def get_full_name(self):
-
         full_name = f"{self.username} {self.phone_number}"
         return full_name.strip()
 
@@ -113,3 +118,4 @@ class UserProfileModel(models.Model):
     class Meta:
         verbose_name = _("user profile")
         verbose_name_plural = _("user profiles")
+        db_table = "user_profiles"

@@ -1,0 +1,23 @@
+from django.urls import path
+from django.views.generic import TemplateView
+
+from . import views
+
+app_name = "mediafiles"
+
+urlpatterns = [
+    path("files/", TemplateView.as_view(template_name="files.html")),
+    path("upload/profile-photo/", views.UploadUserProfilePhotoView.as_view(), name="upload_profile_photo"),
+    path("albums/create/", views.AlbumCreateView.as_view(), name="album-create"),  # ПОСТАВЬ ВЫШЕ!
+    path("albums/<slug:target_user>/", views.AlbumListView.as_view(), name="album-list"),
+    path("albums/<str:username>/<slug:album_slug>/settings/", views.SettingsAlbumView.as_view(), name="settings-album"),
+    path("albums/<slug:target_user>/<slug:album_slug>/delete/", views.DeleteAlbumView.as_view(), name="delete-album"),
+    path("albums/add-photos/<slug:album_slug>/", views.AddPhotosToAlbumView.as_view(), name="add-photos"),
+    path(
+        "albums/<slug:target_user>/<slug:album_slug>/",
+        views.AlbumGalleryView.as_view(),
+        name="album-detail"
+    )
+    # path("albums/<slug:target_user>/<slug:album_slug>/", views.AlbumDetailView.as_view(), name="album-detail"),
+    # path("photo-detail/<str:uuid_photo>/", views.PhotoDetailView.as_view(), name="photo-detail"),
+]
